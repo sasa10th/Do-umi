@@ -50,12 +50,16 @@ Do-umi/
 │       └── signature.py    # 전자서명 처리
 ├── tests/
 │   ├── __init__.py
+│   ├── run.py
 │   ├── test_auth.py
 │   ├── test_models.py
 │   └── test_routes.py
 ├── static/
 │   ├── css/
+│   │   └── style.css
 │   ├── js/
+│   │   ├── app.js
+│   │   └── signature.js
 │   └── img/
 ├── templates/
 │   ├── base.html           # 공통 레이아웃
@@ -65,11 +69,21 @@ Do-umi/
 │   └── dashboard/
 │       ├── index.html
 │       ├── penalty.html
-│       └── document.html
+│       ├── document.html
+│       ├── notifications.html
+│       ├── profile.html
+│       ├── admin.html
+│       └── admin_add_penalty.html
 ├── migrations/             # Flask-Migrate DB 마이그레이션
 ├── .env
 ├── .gitignore
 ├── config.py               # 환경별 설정 클래스 (Dev/Prod/Test)
 ├── README.md
 └── requirements.txt
+```
+
+## 5. 실행
+```bash
+pip install flask flask-sqlalchemy flask-migrate flask-login flask-mail
+python -m tests.run
 ```
