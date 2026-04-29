@@ -35,39 +35,41 @@ CS Project in Sejong Academy of Science and Arts
 ---
 
 ## 4. 프로젝트 구조
-Do-u-mi/<br>
-├── app/<br>
-│&nbsp;&nbsp;&nbsp;├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)<br>
-│   ├── models.py           # DB 모델<br>
-│   ├── auth.py             # 인증 로직 (Blueprint)<br>
-│   ├── routes.py           # 페이지 라우팅 (Blueprint)<br>
-│   ├── api.py              # JSON API 엔드포인트 (필요 시)<br>
-│   └── utils/<br>
-│       ├── __init__.py<br>
-│       ├── mail.py         # 이메일 발송<br>
-│       ├── sms.py          # SMS 발송<br>
-│       └── signature.py    # 전자서명 처리<br>
-├── tests/<br>
-│   ├── __init__.py<br>
-│   ├── test_auth.py<br>
-│   ├── test_models.py<br>
-│   └── test_routes.py<br>
-├── static/<br>
-│   ├── css/<br>
-│   ├── js/<br>
-│   └── img/<br>
-├── templates/<br>
-│   ├── base.html           # 공통 레이아웃<br>
-│   ├── auth/<br>
-│   │   ├── login.html<br>
-│   │   └── signup.html<br>
-│   └── dashboard/<br>
-│       ├── index.html<br>
-│       ├── penalty.html<br>
-│       └── document.html<br>
-├── migrations/             # Flask-Migrate DB 마이그레이션<br>
-├── .env<br>
-├── .gitignore<br>
-├── config.py               # 환경별 설정 클래스 (Dev/Prod/Test)<br>
-├── README.md<br>
-└── requirements.txt<br>
+```text
+Do-u-mi/
+├── app/
+│   ├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)
+│   ├── models.py           # DB 모델
+│   ├── auth.py             # 인증 로직 (Blueprint)
+│   ├── routes.py           # 페이지 라우팅 (Blueprint)
+│   ├── api.py              # JSON API 엔드포인트 (필요 시)
+│   └── utils/
+│       ├── __init__.py
+│       ├── mail.py         # 이메일 발송
+│       ├── sms.py          # SMS 발송
+│       └── signature.py    # 전자서명 처리
+├── tests/
+│   ├── __init__.py
+│   ├── test_auth.py
+│   ├── test_models.py
+│   └── test_routes.py
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── img/
+├── templates/
+│   ├── base.html           # 공통 레이아웃
+│   ├── auth/
+│   │   ├── login.html
+│   │   └── signup.html
+│   └── dashboard/
+│       ├── index.html
+│       ├── penalty.html
+│       └── document.html
+├── migrations/             # Flask-Migrate DB 마이그레이션
+├── .env
+├── .gitignore
+├── config.py               # 환경별 설정 클래스 (Dev/Prod/Test)
+├── README.md
+└── requirements.txt
+```
