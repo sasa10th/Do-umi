@@ -36,7 +36,7 @@ CS Project in Sejong Academy of Science and Arts
 
 ## 4. 프로젝트 구조
 ```text
-Do-u-mi/
+Do-umi/
 ├── app/
 │   ├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)
 │   ├── models.py           # DB 모델
