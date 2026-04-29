@@ -1,1 +1,102 @@
+{% extends "base.html" %}
+{% block title %}대시보드{% endblock %}
 
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">대시보드</h1>
+</div>
+
+<!-- 요약 카드 -->
+<div class="stats-grid">
+  <div class="stat-card {% if current_user.total_penalty_points >= 10 %}stat-danger{% elif current_user.total_penalty_points >= 5 %}stat-warning{% else %}stat-safe{% endif %}">
+    <div class="stat-label">누적 벌점</div>
+    <div class="stat-value">{{ current_user.total_penalty_points }}점</div>
+    <div class="stat-sub">{{ current_user.stage }}단계 / 최대 15점 경고</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">천자문 현황</div>
+    <div class="stat-value">{{ current_user.documents | selectattr('is_submitted', 'equalto', False) | list | length }}건</div>
+    <div class="stat-sub">
+      {% if upcoming_docs %}
+        {{ upcoming_docs.due_date }} 마감
+      {% else %}
+        진행 중인 과제 없음
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">천자문 면제권</div>
+    <div class="stat-value">{{ current_user.exemption_count }}개</div>
+    <div class="stat-sub">프로필에서 등록</div>
+  </div>
+</div>
+
+<!-- 최근 벌점 내역 -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>최근 3건</h2>
+    <a href="{{ url_for('main.penalties') }}" class="link-more">전체 내역 보기 →</a>
+  </div>
+
+  {% if recent_penalties %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>구분</th>
+        <th>사유</th>
+        <th>점수</th>
+        <th>상태</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in recent_penalties %}
+      <tr>
+        <td>{{ p.date }}</td>
+        <td>
+          <span class="badge-category {% if p.points > 0 %}badge-penalty{% else %}badge-merit{% endif %}">
+            {{ p.category }}
+          </span>
+        </td>
+        <td>{{ p.reason }}</td>
+        <td>
+          {% if p.points > 0 %}<span class="text-danger">-{{ p.points }}점</span>{% endif %}
+          {% if p.merit_points > 0 %}<span class="text-success">+{{ p.merit_points }}점</span>{% endif %}
+        </td>
+        <td>
+          {% if p.is_confirmed %}
+            <span class="badge badge-confirmed">확인완료</span>
+          {% else %}
+            <span class="badge badge-pending">미확인</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-msg">벌점 내역이 없습니다.</p>
+  {% endif %}
+</div>
+
+<!-- 바로가기 -->
+<div class="shortcut-grid">
+  <a href="{{ url_for('main.penalties') }}" class="shortcut-card">
+    <span class="shortcut-icon">⚑</span>
+    <span class="shortcut-label">벌점 현황</span>
+    <span class="shortcut-desc">나의 누적 벌점 및 상점 내역</span>
+  </a>
+  <a href="{{ url_for('main.documents') }}" class="shortcut-card">
+    <span class="shortcut-icon">✎</span>
+    <span class="shortcut-label">천자문 기한</span>
+    <span class="shortcut-desc">제출 날짜 및 면제 신청 관리</span>
+  </a>
+  <a href="{{ url_for('auth.profile') }}" class="shortcut-card">
+    <span class="shortcut-icon">👤</span>
+    <span class="shortcut-label">프로필</span>
+    <span class="shortcut-desc">계정 정보 및 설정</span>
+  </a>
+</div>
+{% endblock %}

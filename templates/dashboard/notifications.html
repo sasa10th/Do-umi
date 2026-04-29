@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}알림{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">알림</h1>
+</div>
+
+<div class="section-card">
+  {% if notifications %}
+  <div class="notif-list">
+    {% for n in notifications %}
+    <div class="notif-item notif-{{ n.ntype }}">
+      <div class="notif-icon">
+        {% if n.ntype == 'danger' %}⚠{% elif n.ntype == 'success' %}✔{% else %}ℹ{% endif %}
+      </div>
+      <div class="notif-body">
+        <div class="notif-title">{{ n.title }}</div>
+        <div class="notif-text">{{ n.body }}</div>
+        <div class="notif-time">{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-msg">알림이 없습니다.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,1 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Do우미{% endblock %} — SASA 기숙사 벌점 시스템</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text">SASA</span>
+      <span class="logo-sub">학생 통합 관리 시스템</span>
+    </div>
 
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('main.dashboard') }}" class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+        <span class="nav-icon">⊞</span>
+        <span>대시보드</span>
+      </a>
+      <a href="{{ url_for('main.penalties') }}" class="nav-item {% if request.endpoint == 'main.penalties' %}active{% endif %}">
+        <span class="nav-icon">⚑</span>
+        <span>벌점 현황</span>
+      </a>
+      <a href="{{ url_for('main.documents') }}" class="nav-item {% if request.endpoint == 'main.documents' %}active{% endif %}">
+        <span class="nav-icon">✎</span>
+        <span>천자문 기한</span>
+      </a>
+      <a href="{{ url_for('main.notifications') }}" class="nav-item {% if request.endpoint == 'main.notifications' %}active{% endif %}">
+        <span class="nav-icon">🔔</span>
+        <span>알림</span>
+        <span class="badge" id="notif-badge" style="display:none"></span>
+      </a>
+      {% if current_user.is_admin %}
+      <hr class="nav-divider" />
+      <a href="{{ url_for('main.admin_dashboard') }}" class="nav-item {% if 'admin' in request.endpoint %}active{% endif %}">
+        <span class="nav-icon">⚙</span>
+        <span>관리자</span>
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('auth.profile') }}" class="nav-item user-item">
+        <div class="avatar">{{ current_user.name[0] }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ current_user.name }}</span>
+          <span class="user-email">{{ current_user.email }}</span>
+        </div>
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="logout-btn">로그아웃</a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-search">
+        <input type="text" id="searchInput" placeholder="벌점·천자문 검색…" autocomplete="off" />
+        <div id="searchResults" class="search-dropdown"></div>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('main.notifications') }}" class="notif-btn">
+          🔔 <span id="topNotifCount"></span>
+        </a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+              <button onclick="this.parentElement.remove()" class="alert-close">×</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

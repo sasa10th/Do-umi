@@ -1,1 +1,66 @@
+{% extends "base.html" %}
+{% block title %}회원가입{% endblock %}
 
+{% block auth_content %}
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-brand">
+      <h1 class="brand-title">SASA</h1>
+      <p class="brand-tagline">학생 통합 관리 시스템<br />— Do우미</p>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <h2 class="auth-title">회원가입</h2>
+      <p class="auth-sub">@sasa.hs.kr 이메일만 허용됩니다</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form">
+        <div class="form-group">
+          <label for="email">이메일 <span class="required">*</span></label>
+          <input type="email" id="email" name="email" placeholder="학번@sasa.hs.kr" required
+                 value="{{ email or '' }}" />
+        </div>
+        <div class="form-group">
+          <label for="name">이름 <span class="required">*</span></label>
+          <input type="text" id="name" name="name" placeholder="홍길동" required
+                 value="{{ name or '' }}" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="student_id">학번</label>
+            <input type="text" id="student_id" name="student_id" placeholder="예: 20231234"
+                   value="{{ student_id or '' }}" />
+          </div>
+          <div class="form-group">
+            <label for="room_number">호실</label>
+            <input type="text" id="room_number" name="room_number" placeholder="예: 302호"
+                   value="{{ room_number or '' }}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="phone">전화번호 <span class="optional">(선택)</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="010-0000-0000"
+                 value="{{ phone or '' }}" />
+        </div>
+        <div class="form-group">
+          <label for="password">비밀번호 <span class="required">*</span></label>
+          <input type="password" id="password" name="password" placeholder="8자 이상" required minlength="8" />
+        </div>
+        <div class="form-group">
+          <label for="password2">비밀번호 확인 <span class="required">*</span></label>
+          <input type="password" id="password2" name="password2" placeholder="비밀번호 재입력" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">회원가입</button>
+      </form>
+
+      <p class="auth-link">이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

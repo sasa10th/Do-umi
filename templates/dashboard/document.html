@@ -1,1 +1,79 @@
+{% extends "base.html" %}
+{% block title %}천자문 기한{% endblock %}
 
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">천자문 기한</h1>
+  <div class="page-meta">보유 면제권: <strong>{{ exemption_count }}개</strong></div>
+</div>
+
+<!-- 면제권 현황 -->
+<div class="section-card exemption-card">
+  <h3>📋 천자문 면제권 현황</h3>
+  <div class="exemption-status">
+    <div class="exemption-count">
+      <span class="count-num">{{ exemption_count }}</span>
+      <span class="count-label">개 보유</span>
+    </div>
+    <p class="exemption-desc">면제권 1개를 사용하면 천자문 제출 1건을 면제받을 수 있습니다.</p>
+  </div>
+</div>
+
+<!-- 천자문 목록 -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>천자문 목록</h2>
+  </div>
+
+  {% if documents %}
+  <div class="doc-list">
+    {% for doc in documents %}
+    <div class="doc-item {% if doc.is_overdue %}doc-overdue{% elif doc.days_remaining <= 3 %}doc-urgent{% endif %}">
+      <div class="doc-info">
+        <div class="doc-title">{{ doc.title }}</div>
+        <div class="doc-meta">
+          <span class="doc-type">{{ doc.doc_type }}</span>
+          <span class="doc-due">
+            마감: {{ doc.due_date }}
+            {% if doc.is_extended %}
+              <span class="badge badge-extended">연기됨</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="doc-status">
+        {% if doc.is_submitted %}
+          <span class="badge badge-confirmed">제출완료</span>
+        {% elif doc.is_overdue %}
+          <span class="badge badge-overdue">기한초과 ({{ doc.days_remaining * -1 }}일 경과)</span>
+        {% else %}
+          <span class="badge badge-pending">{{ doc.days_remaining }}일 남음</span>
+        {% endif %}
+      </div>
+
+      {% if not doc.is_submitted %}
+      <div class="doc-actions">
+        {% if exemption_count > 0 %}
+        <form method="POST" action="{{ url_for('main.extend_document', doc_id=doc.id) }}"
+              onsubmit="return confirm('면제권 1개를 사용하여 이 천자문을 면제하시겠습니까?')">
+          <button type="submit" class="btn btn-sm btn-outline">면제권 사용</button>
+        </form>
+        {% endif %}
+
+        {% if not doc.is_extended %}
+        <form method="POST" action="{{ url_for('main.delay_document', doc_id=doc.id) }}"
+              onsubmit="return confirm('시험 기간으로 2주 연기하시겠습니까?')">
+          <button type="submit" class="btn btn-sm">기한 연기</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-msg">현재 진행 중인 천자문 과제가 없습니다. 🎉</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,1 +1,151 @@
+{% extends "base.html" %}
+{% block title %}벌점 현황{% endblock %}
 
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">본인 벌점 현황</h1>
+</div>
+
+<!-- 벌점 요약 -->
+<div class="penalty-summary">
+  <div class="summary-item">
+    <div class="summary-label">누적 벌점</div>
+    <div class="summary-value text-danger">{{ current_user.total_penalty_points }}점</div>
+  </div>
+  <div class="summary-item">
+    <div class="summary-label">상점</div>
+    <div class="summary-value text-success">{{ current_user.total_merit_points }}점</div>
+  </div>
+  <div class="summary-item">
+    <div class="summary-label">현재 단계</div>
+    <div class="summary-value">{{ current_user.stage }}단계</div>
+  </div>
+</div>
+
+<!-- 벌점 기준표 -->
+<details class="collapsible">
+  <summary>벌점 기준표 보기</summary>
+  <div class="standards-grid">
+    {% if standards %}
+      {% for s in standards %}
+      <div class="standard-item">
+        <span class="std-cat">{{ s.category }}</span>
+        <span class="std-desc">{{ s.description }}</span>
+        <span class="std-pts {% if s.penalty_points > 0 %}text-danger{% else %}text-success{% endif %}">
+          {% if s.penalty_points > 0 %}-{{ s.penalty_points }}점{% else %}+{{ s.merit_points }}점{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty-msg">기준표가 등록되지 않았습니다.</p>
+    {% endif %}
+  </div>
+</details>
+
+<!-- 정렬 -->
+<div class="table-toolbar">
+  <span class="toolbar-label">정렬:</span>
+  <a href="?sort=date_desc" class="sort-btn {% if sort == 'date_desc' %}active{% endif %}">최신순</a>
+  <a href="?sort=date_asc" class="sort-btn {% if sort == 'date_asc' %}active{% endif %}">오래된순</a>
+  <a href="?sort=points_desc" class="sort-btn {% if sort == 'points_desc' %}active{% endif %}">점수 높은순</a>
+</div>
+
+<!-- 벌점 내역 테이블 -->
+<div class="section-card">
+  {% if penalties %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>구분</th>
+        <th>사유</th>
+        <th>점수</th>
+        <th>상태</th>
+        <th>전자서명</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in penalties %}
+      <tr>
+        <td>{{ p.date }}</td>
+        <td>
+          <span class="badge-category {% if p.points > 0 %}badge-penalty{% else %}badge-merit{% endif %}">
+            {{ p.category }}
+          </span>
+        </td>
+        <td>{{ p.reason }}</td>
+        <td>
+          {% if p.points > 0 %}<span class="text-danger">-{{ p.points }}점</span>{% endif %}
+          {% if p.merit_points > 0 %}<span class="text-success">+{{ p.merit_points }}점</span>{% endif %}
+        </td>
+        <td>
+          {% if p.is_confirmed %}
+            <span class="badge badge-confirmed">확인완료</span>
+          {% else %}
+            <span class="badge badge-pending">미확인</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if not p.is_confirmed %}
+          <button class="btn btn-sm btn-outline" onclick="openSignModal({{ p.id }})">서명하기</button>
+          {% else %}
+            <span class="text-muted text-sm">{{ p.confirmed_at.strftime('%Y-%m-%d') if p.confirmed_at else '-' }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-msg">벌점 내역이 없습니다. 🎉</p>
+  {% endif %}
+</div>
+
+<!-- 전자서명 모달 -->
+<div id="signModal" class="modal" style="display:none">
+  <div class="modal-backdrop" onclick="closeSignModal()"></div>
+  <div class="modal-box">
+    <h3 class="modal-title">벌점 확인 전자서명</h3>
+    <p class="modal-desc">아래 서명란에 서명하면 벌점 내역을 확인한 것으로 처리됩니다.</p>
+    <canvas id="signatureCanvas" width="400" height="150" class="signature-canvas"></canvas>
+    <div class="modal-actions">
+      <button class="btn btn-sm btn-outline" onclick="clearCanvas()">지우기</button>
+      <button class="btn btn-sm btn-primary" onclick="submitSignature()">확인 완료</button>
+      <button class="btn btn-sm" onclick="closeSignModal()">취소</button>
+    </div>
+    <form id="signForm" method="POST" style="display:none">
+      <input type="hidden" name="signature_data" id="signatureData" />
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/signature.js') }}"></script>
+<script>
+let currentPenaltyId = null;
+
+function openSignModal(penaltyId) {
+  currentPenaltyId = penaltyId;
+  document.getElementById('signModal').style.display = 'flex';
+  initCanvas();
+}
+
+function closeSignModal() {
+  document.getElementById('signModal').style.display = 'none';
+}
+
+function submitSignature() {
+  const canvas = document.getElementById('signatureCanvas');
+  const dataUrl = canvas.toDataURL('image/png');
+  if (dataUrl.length < 5000) {
+    alert('서명을 그려주세요.');
+    return;
+  }
+  const form = document.getElementById('signForm');
+  form.action = `/penalties/${currentPenaltyId}/confirm`;
+  document.getElementById('signatureData').value = dataUrl;
+  form.submit();
+}
+</script>
+{% endblock %}
