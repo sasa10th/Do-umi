@@ -35,7 +35,7 @@ CS Project in Sejong Academy of Science and Arts<br>
 
 ## 4. 프로젝트 구조
 Do-u-mi/<br>
-├── app/
+├── app/<br>
 │   ├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)<br>
 │   ├── models.py           # DB 모델<br>
 │   ├── auth.py             # 인증 로직 (Blueprint)<br>
