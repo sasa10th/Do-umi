@@ -1,5 +1,6 @@
 # Do-umi
-CS Project in Sejong Academy of Science and Arts<br>
+CS Project in Sejong Academy of Science and Arts
+
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 
 > **"열심히 살자"** - TEAM 2 (신재민, 김지환, 김민기)
@@ -36,7 +37,7 @@ CS Project in Sejong Academy of Science and Arts<br>
 ## 4. 프로젝트 구조
 Do-u-mi/<br>
 ├── app/<br>
-│   ├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)<br>
+│&nbsp;&nbsp;&nbsp;├── __init__.py         # 앱 팩토리 (create_app 패턴 권장)<br>
 │   ├── models.py           # DB 모델<br>
 │   ├── auth.py             # 인증 로직 (Blueprint)<br>
 │   ├── routes.py           # 페이지 라우팅 (Blueprint)<br>
