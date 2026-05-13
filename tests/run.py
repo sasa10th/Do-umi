@@ -17,22 +17,22 @@ def seed_db():
             email='admin@sasa.hs.kr',
             name='관리자',
             student_id='00000000',
-            room_number='관리실',
+            room_number='사감실',
             is_admin=True
         )
         admin.password = 'admin1234'
         db.session.add(admin)
 
     # 테스트 학생 계정
-    student = User.query.filter_by(student_id='20231001').first()
+    student = User.query.filter_by(student_id='30402').first()
 
     if not student:
         student = User(
-            email='20231001@sasa.hs.kr',
+            email='30402@sasa.hs.kr',
             name='김민기',
-            student_id='20231001',
-            room_number='302호',
-            phone='010-1234-5678',
+            student_id='30402',
+            room_number='406',
+            phone='01012345678',
             grade=1
         )
         student.password = 'student1234'
@@ -54,7 +54,7 @@ def seed_db():
         ('생활규정', '휴게실 이외의 장소에서 취식, 시간 미준수', 2, 0),
         ('생활규정', '사전 신고 없이 자습 시간 중 호실 취침', 2, 0),
         ('생활규정', '타 호실 무단 출입 및 타 호실 취침', 3, 0),
-        ('생활규정', '학습 공간에서 학습과 관계없는 행위(게임, 드라마 시청 등)을 하는 경우', 3, 0),
+        ('생활규정', '학습 공간에서 학습과 관계없는 행위(게임, 드라마 시청 등)를 하는 경우', 3, 0),
         ('생활규정', '기숙사 무단 출입 및 방조', 3, 0),
         ('생활규정', '사감의 정당한 지시 불이행 (비명시 항목)', 5, 0),
         ('생활규정', '기숙사 사감의 승인 없이 배달음식을 기숙사에 반입 및 섭취', 5, 0),
@@ -89,24 +89,24 @@ def seed_db():
                 issued_by_id=admin.id,
                 date=date.today() - timedelta(days=10),
                 category='생활규정',
-                reason='복도 소음 유발',
-                points=1
-            ),
-            Penalty(
-                student_id=student.id,
-                issued_by_id=admin.id,
-                date=date.today() - timedelta(days=5),
-                category='학업규정',
-                reason='수업 중 휴대폰 사용',
+                reason='소란 행위',
                 points=2
             ),
             Penalty(
                 student_id=student.id,
                 issued_by_id=admin.id,
+                date=date.today() - timedelta(days=5),
+                category='생활규정',
+                reason='학습 시간 지각',
+                points=1
+            ),
+            Penalty(
+                student_id=student.id,
+                issued_by_id=admin.id,
                 date=date.today() - timedelta(days=3),
-                category='봉사활동',
-                reason='모범 생활',
-                merit_points=2
+                category='생활규정',
+                reason='기숙사 봉사활동 시간 참여',
+                merit_points=1
             ),
         ]
 
@@ -144,9 +144,9 @@ def seed_db():
 
     db.session.commit()
 
-    print('✅ 시드 데이터 생성 완료')
-    print('📌 관리자: admin@sasa.hs.kr / admin1234')
-    print('📌 학생:   20231001@sasa.hs.kr / student1234')
+    print('◉ 시드 데이터 생성 완료')
+    print(' ✦ 관리자: admin@sasa.hs.kr / admin1234')
+    print(' ✦ 학생: 30402@sasa.hs.kr / student1234')
 
 
 @app.cli.command('seed')
