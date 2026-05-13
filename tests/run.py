@@ -5,11 +5,65 @@ from datetime import date, timedelta
 
 app = create_app(os.environ.get('FLASK_ENV', 'development'))
 
+# 벌점 기준표 (단일 소스 오브 트루스)
+STANDARDS_DATA = [
+    ('생활규정', '아침 점호 지각 / 오전 시까지 미등교 / 저녁 점호 불참', 1, 0),
+    ('생활규정', '호실 청결 상태 불량', 1, 0),
+    ('생활규정', '학습 시간 지각 / 무단 이석', 1, 0),
+    ('생활규정', '귀사 시간 미준수 및 귀가 신고 불이행', 2, 0),
+    ('생활규정', '소란 행위 / 취침 방해 / 특별한 사유 없이 취침 시간에 호실 밖에 있는 경우', 2, 0),
+    ('생활규정', '기숙사 내 허용되지 않은 음식물 및 물품 반입', 2, 0),
+    ('생활규정', '휴게실 이외의 장소에서 취식 / 시간 미준수', 2, 0),
+    ('생활규정', '사전 신고 없이 자습 시간 중 호실 취침', 2, 0),
+    ('생활규정', '타 호실 무단 출입 및 타 호실 취침', 3, 0),
+    ('생활규정', '학습 공간에서 학습과 관계없는 행위 (게임, 드라마 시청 등)', 3, 0),
+    ('생활규정', '기숙사 무단 출입 및 방조', 3, 0),
+    ('생활규정', '사감의 정당한 지시 불이행 (비명시 항목)', 5, 0),
+    ('생활규정', '사감의 승인 없이 배달음식을 기숙사에 반입 및 섭취', 5, 0),
+    ('생활규정', '무단 외출 (기숙사동에서 이탈)', 5, 0),
+    ('생활규정', '상기 내용에 포함되지 않은 사안 (생활교육위원회 회부 시 벌점 5점)', 1, 0),
+]
 
-def seed_db():
-    """개발용 시드 데이터 생성"""
+
+def sync_standards():
+    """
+    벌점 기준표를 항상 최신 상태로 동기화.
+    - (category, description) 조합을 기준 키로 사용
+    - 없으면 INSERT, 있으면 points가 다를 때만 UPDATE
+    - STANDARDS_DATA에 없는 기존 레코드는 건드리지 않음 (삭제 원할 시 별도 처리)
+    """
+    updated = 0
+    created = 0
+
+    for cat, desc, pts, merit in STANDARDS_DATA:
+        existing = PenaltyStandard.query.filter_by(
+            category=cat, description=desc
+        ).first()
+
+        if existing is None:
+            db.session.add(PenaltyStandard(
+                category=cat,
+                description=desc,
+                penalty_points=pts,
+                merit_points=merit,
+            ))
+            created += 1
+        else:
+            # 점수가 변경됐을 때만 업데이트
+            if existing.penalty_points != pts or existing.merit_points != merit:
+                existing.penalty_points = pts
+                existing.merit_points = merit
+                updated += 1
+
+    db.session.commit()
+    print(f'벌점 기준표 동기화 완료 — 신규: {created}건, 업데이트: {updated}건')
+
+
+def seed_users_and_test_data():
+    """최초 1회만 실행되는 테스트 데이터 (유저가 이미 있으면 스킵)"""
     if User.query.first():
-        return  # 이미 데이터 있으면 스킵
+        print('ⓘ 유저 데이터가 이미 존재하여 테스트 시드를 스킵합니다.')
+        return
 
     # 관리자 계정
     admin = User(
@@ -17,7 +71,7 @@ def seed_db():
         name='관리자',
         student_id='00000000',
         room_number='관리실',
-        is_admin=True
+        is_admin=True,
     )
     admin.password = 'admin1234'
     db.session.add(admin)
@@ -29,35 +83,12 @@ def seed_db():
         student_id='20231001',
         room_number='302호',
         phone='010-1234-5678',
-        grade=1
+        grade=1,
     )
     student.password = 'student1234'
     db.session.add(student)
 
     db.session.flush()  # ID 생성
-
-    # 벌점 기준표
-    # 카테고리, 사유, 벌점, 상점
-    standards_data = [
-        ('생활규정', '아침 점호 지각오전 시까지 미등교저녁 점호 불참', 1, 0),
-        ('생활규정', '호실 청결 상태 불량', 1, 0),
-        ('생활규정', '학습 시간 지각무단 이석', 1, 0),
-        ('생활규정', '귀사 시간 미 준수 및 귀가 신고 불이행', 2, 0),
-        ('생활규정', '소란 행위취침 방해특별한 사유 없이 취침 시간에 호실 밖에 있는 경우', 2, 0),
-        ('생활규정', '기숙사 내 허용되지 않은 음식물 및 물품 반입', 2, 0),
-        ('생활규정', '휴게실 이외의 장소에서 취식시간 미준수', 2, 0),
-        ('생활규정', '사전 신고 없이 자습 시간 중 호실 취침', 2, 0),
-        ('생활규정', '타 호실 무단 출입 및 타 호실 취침', 3, 0),
-        ('생활규정', '학습 공간에서 학습과 관계없는 행위게임드라마 시청 등를 하는 경우', 3, 0),
-        ('생활규정', '기숙사 무단 출입 및 방조 (이용 가능 시각이 아님에도 출입하는 경우, 이용가능 대상이 아닌 학생이 기숙사에 머무를 수 있도록 조력하는 경우 등)', 3, 0),
-        ('생활규정', '사감의 정당한 지시 불이행 (비명시 항목)', 5, 0),
-        ('생활규정', '기숙사 사감의 승인 없이 배달음식을 기숙사에 반입 및 섭취', 5, 0),
-        ('생활규정', '무단 외출 (기숙사동에서 이탈)', 5, 0),
-        ('생활규정', '상기 내용에 포함되지 않았으나 뚜렷이 지도할 내용 (단, 생활교육위원회 회부 사안의 경우에는 벌점 5점 부여)', 1-5, 0),
-    ]
-    for cat, desc, pts, merit in standards_data:
-        s = PenaltyStandard(category=cat, description=desc, penalty_points=pts, merit_points=merit)
-        db.session.add(s)
 
     # 테스트 벌점 데이터
     penalties = [
@@ -89,9 +120,15 @@ def seed_db():
     db.session.add(ex)
 
     db.session.commit()
-    print('✅ 시드 데이터 생성 완료')
+    print('✅ 테스트 시드 데이터 생성 완료')
     print('📌 관리자: admin@sasa.hs.kr / admin1234')
     print('📌 학생:   20231001@sasa.hs.kr / student1234')
+
+
+def seed_db():
+    """전체 시드 진입점"""
+    sync_standards()  # 항상 실행
+    seed_users_and_test_data()  # 최초 1회만
 
 
 @app.cli.command('seed')
@@ -100,6 +137,13 @@ def seed_command():
     with app.app_context():
         db.create_all()
         seed_db()
+
+
+@app.cli.command('sync-standards')
+def sync_standards_command():
+    """벌점 기준표만 단독 동기화: flask sync-standards"""
+    with app.app_context():
+        sync_standards()
 
 
 if __name__ == '__main__':
