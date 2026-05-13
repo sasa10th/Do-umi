@@ -6,8 +6,8 @@
 <div class="auth-page">
   <div class="auth-left">
     <div class="auth-brand">
-      <h1 class="brand-title">SASA</h1>
-      <p class="brand-tagline">학생 통합 관리 시스템<br />— Do우미</p>
+      <h1 class="brand-title">Do우미</h1>
+      <p class="brand-tagline">— SASA 기숙사 상벌점 시스템</p>
       <p class="brand-desc">벌점 조회, 천자문 일정, 전자서명으로의 편<br />곳에서 관리하세요.</p>
     </div>
   </div>
@@ -25,7 +25,7 @@
       <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
         <div class="form-group">
           <label for="email">이메일</label>
-          <input type="email" id="email" name="email" placeholder="학번@sasa.hs.kr" required
+          <input type="email" id="email" name="email" placeholder="sasa@sasa.hs.kr" required
                  value="{{ request.form.get('email', '') }}" />
         </div>
         <div class="form-group">
