@@ -367,6 +367,7 @@ a { text-decoration: none; color: inherit; }
 .form-group input,
 .form-group select,
 .form-group textarea {
+  width: 100%;
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;

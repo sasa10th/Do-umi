@@ -2,6 +2,9 @@
 {% block title %}회원가입{% endblock %}
 
 {% block auth_content %}
+<!-- Google GSI 스크립트 -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <div class="auth-page">
   <div class="auth-left">
     <div class="auth-brand">
@@ -20,12 +23,29 @@
         {% endfor %}
       {% endwith %}
 
-      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form">
+      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form" id="signupForm">
+
+        <!-- 이메일 + 인증 버튼 -->
         <div class="form-group">
           <label for="email">이메일 <span class="required">*</span></label>
-          <input type="email" id="email" name="email" placeholder="예: sasa@sasa.hs.kr" required
-                 value="{{ email or '' }}" />
+
+          <!-- 인증 전: Google 공식 버튼이 여기 렌더링됨 -->
+          <div id="beforeVerify">
+            <div id="googleBtnArea"></div>
+            <small style="color: gray; display: block; margin-top: 4px;">
+              Google 계정으로 이메일을 인증해주세요.
+            </small>
+          </div>
+
+          <!-- 인증 후 -->
+          <div id="afterVerify" style="display: none;">
+            <input type="email" id="email" name="email" readonly />
+            <small id="verifyStatus" style="color: green;"></small>
+          </div>
+
+          <input type="hidden" id="googleToken" name="google_token" />
         </div>
+
         <div class="form-group">
           <label for="name">이름 <span class="required">*</span></label>
           <input type="text" id="name" name="name" placeholder="예: 구름이" required
@@ -56,11 +76,58 @@
           <label for="password2">비밀번호 확인 <span class="required">*</span></label>
           <input type="password" id="password2" name="password2" placeholder="비밀번호 재입력" required />
         </div>
-        <button type="submit" class="btn btn-primary btn-full">회원가입</button>
+
+        <!-- 인증 완료 전까지 비활성화 -->
+        <button type="submit" class="btn btn-primary btn-full" id="submitBtn" disabled>
+          회원가입
+        </button>
       </form>
 
       <p class="auth-link">이미 계정이 있으신가요? <a href="{{ url_for('auth.login') }}">로그인</a></p>
     </div>
   </div>
 </div>
+
+<script>
+  const CLIENT_ID = "1006706829829-i3l1ojq2p5ilnhat2fcn8qovtent7dp0.apps.googleusercontent.com";
+  const ALLOWED_DOMAIN = "sasa.hs.kr";
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: handleGoogleResponse,
+      auto_select: false,
+    });
+
+    // prompt() 대신 실제 버튼 렌더링
+    google.accounts.id.renderButton(
+      document.getElementById("googleBtnArea"),
+      {
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        locale: "ko",
+        width: 300,
+      }
+    );
+  };
+
+  function handleGoogleResponse(response) {
+    const payload = JSON.parse(atob(response.credential.split(".")[1]));
+    const email = payload.email;
+    const verified = payload.email_verified;
+
+    if (!verified || !email.endsWith("@" + ALLOWED_DOMAIN)) {
+      alert("sasa.hs.kr 계정만 허용됩니다.");
+      return;
+    }
+
+    document.getElementById("beforeVerify").style.display = "none";
+    document.getElementById("afterVerify").style.display = "block";
+    document.getElementById("email").value = email;
+    document.getElementById("googleToken").value = response.credential;
+    document.getElementById("verifyStatus").textContent = `${email} 인증 완료!`;
+    document.getElementById("submitBtn").disabled = false;
+  }
+</script>
 {% endblock %}
