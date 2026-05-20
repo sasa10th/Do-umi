@@ -114,13 +114,11 @@ def seed_db():
         docs = [
             Document(
                 student_id=student.id,
-                title='천자문 1-50자',
                 doc_type='천자문',
                 due_date=date.today() + timedelta(days=7)
             ),
             Document(
                 student_id=student.id,
-                title='천자문 51-100자',
                 doc_type='천자문',
                 due_date=date.today() + timedelta(days=21)
             ),

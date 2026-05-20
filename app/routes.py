@@ -292,11 +292,10 @@ def admin_assign_document():
         abort(403)
 
     student_id = request.form.get('student_id', type=int)
-    title = request.form.get('title', '').strip()
     doc_type = request.form.get('doc_type', '천자문')
     due_date_str = request.form.get('due_date', '')
 
-    if not student_id or not title or not due_date_str:
+    if not student_id or not due_date_str:
         flash('필수 항목을 입력해주세요.', 'danger')
         return redirect(url_for('main.admin_dashboard'))
 
@@ -308,7 +307,6 @@ def admin_assign_document():
 
     doc = Document(
         student_id=student_id,
-        title=title,
         doc_type=doc_type,
         due_date=due_date
     )
