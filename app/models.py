@@ -46,10 +46,8 @@ class User(UserMixin, db.Model):
 
     @property
     def total_penalty_points(self):
-        """현재 유효한 벌점 합계"""
-        total = sum(p.points for p in self.penalties if not p.is_cancelled)
-        total_merit = sum(p.merit_points for p in self.penalties if not p.is_cancelled)
-        return max(0, total - total_merit)
+        """벌점 합계"""
+        return sum(p.points for p in self.penalties if not p.is_cancelled)
 
     @property
     def total_merit_points(self):
