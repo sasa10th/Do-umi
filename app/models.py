@@ -88,7 +88,6 @@ class Penalty(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     issued_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     date = db.Column(db.Date, default=date.today, nullable=False)
-    category = db.Column(db.String(50), nullable=False)  # 생활규정, 학업규정, 생활불량 등
     reason = db.Column(db.String(200), nullable=False)
     points = db.Column(db.Integer, default=0)  # 벌점
     merit_points = db.Column(db.Integer, default=0)  # 상점
@@ -179,8 +178,7 @@ class PenaltyStandard(db.Model):
     __tablename__ = 'penalty_standards'
 
     id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(50), nullable=False)
-    sub_category = db.Column(db.String(100), nullable=True)
+    ##sub_category = db.Column(db.String(100), nullable=True)
     description = db.Column(db.String(200), nullable=False)
     penalty_points = db.Column(db.Integer, default=0)
     merit_points = db.Column(db.Integer, default=0)

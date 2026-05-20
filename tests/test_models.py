@@ -28,9 +28,9 @@ class TestUserModel:
             u.password = 'pass'
             db.session.add(u)
             db.session.flush()
-            p1 = Penalty(student_id=u.id, category='규정', reason='위반', points=3, date=date.today())
-            p2 = Penalty(student_id=u.id, category='규정', reason='위반2', points=2, date=date.today())
-            p3 = Penalty(student_id=u.id, category='상점', reason='모범', merit_points=1, date=date.today())
+            p1 = Penalty(student_id=u.id, reason='위반', points=3, date=date.today())
+            p2 = Penalty(student_id=u.id, reason='위반2', points=2, date=date.today())
+            p3 = Penalty(student_id=u.id, reason='모범', merit_points=1, date=date.today())
             db.session.add_all([p1, p2, p3])
             db.session.commit()
             assert u.total_penalty_points == 4  # 5 - 1
@@ -42,7 +42,7 @@ class TestUserModel:
             db.session.add(u)
             db.session.flush()
             assert u.stage == 1
-            p = Penalty(student_id=u.id, category='규정', reason='위반', points=7, date=date.today())
+            p = Penalty(student_id=u.id, reason='위반', points=7, date=date.today())
             db.session.add(p)
             db.session.commit()
             assert u.stage == 2
