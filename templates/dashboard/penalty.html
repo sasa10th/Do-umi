@@ -122,6 +122,7 @@ function openSignModal(penaltyId) {
   currentPenaltyId = penaltyId;
   document.getElementById('signModal').style.display = 'flex';
   initCanvas();
+  loadSavedSignature();
 }
 
 function closeSignModal() {

@@ -6,21 +6,21 @@
   <h1 class="page-title">관리자 대시보드</h1>
 </div>
 
-<div class="admin-grid">
-  <!-- 학생 목록 -->
-  <div class="section-card admin-full">
-    <div class="section-header">
-      <h2>학생 목록 ({{ total_students }}명)</h2>
-    </div>
+<!-- 학생 목록 -->
+<div class="section-card admin-full">
+  <details class="collapsible">
+    <summary>
+      학생 목록 ({{ total_students }}명)
+    </summary>
+
     <table class="data-table">
       <thead>
         <tr>
           <th>이름</th>
           <th>학번</th>
           <th>호실</th>
-          <th>누적 벌점</th>
-          <th>단계</th>
-          <th>면제권</th>
+          <th>누계 평점</th>
+          <th>면제권 보유 개수</th>
         </tr>
       </thead>
       <tbody>
@@ -30,17 +30,18 @@
           <td>{{ s.student_id or '-' }}</td>
           <td>{{ s.room_number or '-' }}</td>
           <td>
-            <span class="{% if s.total_penalty_points >= 10 %}text-danger{% elif s.total_penalty_points >= 5 %}text-warning{% endif %}">
-              {{ s.total_penalty_points }}점
+            <span class="{% if (s.total_merit_points - s.total_penalty_points) >= 10 %}text-danger{% elif (s.total_merit_points - s.total_penalty_points) >= 5 %}text-warning{% endif %}">
+              {{ (s.total_merit_points - s.total_penalty_points)}}점
             </span>
           </td>
-          <td>{{ s.stage }}단계</td>
           <td>{{ s.exemption_count }}개</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-  </div>
+
+  </details>
+</div>
 
   <!-- 벌점 추가 폼 -->
   <div class="section-card">
