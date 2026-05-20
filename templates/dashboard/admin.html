@@ -1,11 +1,45 @@
 {% extends "base.html" %}
 {% block title %}관리자 대시보드{% endblock %}
 
+
+
 {% block content %}
+
+<style>
+/* 관리자 대시보드 그리드 영역 레이아웃 고정 */
+.admin-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+/* 전체 너비를 써야 하는 카드 (학생 목록, 최근 벌점 내역) */
+.admin-grid .admin-full {
+  flex: 1 1 100%;
+  width: 100%;
+}
+
+/* 3개의 폼 카드를 가로 3분할로 줄이기 */
+.admin-grid .section-card:not(.admin-full) {
+  flex: 1 1 calc(33.333% - 14px);
+  min-width: 320px;
+  box-sizing: border-box;
+}
+
+/* 폼 내부 디자인 조밀하게 정리 */
+.admin-form .form-group {
+  margin-bottom: 12px;
+}
+.admin-form input, .admin-form select {
+  width: 100%;
+  padding: 8px 10px;
+}
+</style>
 <div class="page-header">
   <h1 class="page-title">관리자 대시보드</h1>
 </div>
-
+<div class="admin-grid">
 <!-- 학생 목록 -->
 <div class="section-card admin-full">
   <details class="collapsible">
