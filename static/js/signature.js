@@ -96,3 +96,21 @@ function profDraw(e) {
   profLastX = p.x; profLastY = p.y;
 }
 function profStop() { profDrawing = false; }
+
+function saveProfileSignature() {
+  if (!profCanvas) return;
+  localStorage.setItem('savedSignature', profCanvas.toDataURL('image/png'));
+}
+
+function loadSavedSignature() {
+  const saved = localStorage.getItem('savedSignature');
+  if (!saved || !signCanvas) return;
+  const img = new Image();
+  img.onload = () => {
+    signCtx.clearRect(0, 0, signCanvas.width, signCanvas.height);
+    signCtx.fillStyle = '#f8f9fa';
+    signCtx.fillRect(0, 0, signCanvas.width, signCanvas.height);
+    signCtx.drawImage(img, 0, 0, signCanvas.width, signCanvas.height);
+  };
+  img.src = saved;
+}

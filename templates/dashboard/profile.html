@@ -92,9 +92,18 @@
     const canvas = document.getElementById('profileSignCanvas');
     const dataUrl = canvas.toDataURL('image/png');
     if (dataUrl.length < 5000) { alert('서명을 그려주세요.'); return; }
+
+    localStorage.setItem('savedSignature', dataUrl); // ← 추가
+
     document.getElementById('profileSigData').value = dataUrl;
     document.getElementById('sigForm').submit();
   }
+
+  initProfileCanvas();
+
+  {% if current_user.signature %}
+  localStorage.setItem('savedSignature', '{{ current_user.signature }}');
+  {% endif %}
 
   function clearProfileCanvas() {
     const canvas = document.getElementById('profileSignCanvas');
