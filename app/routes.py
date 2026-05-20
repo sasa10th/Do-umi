@@ -193,7 +193,6 @@ def admin_add_penalty():
 
     if request.method == 'POST':
         student_id = request.form.get('student_id', type=int)
-        category = request.form.get('category', '')
         reason = request.form.get('reason', '').strip()
         points = request.form.get('points', 0, type=int)
         merit_points = request.form.get('merit_points', 0, type=int)
@@ -211,7 +210,6 @@ def admin_add_penalty():
                 student_id=student_id,
                 issued_by_id=current_user.id,
                 date=p_date,
-                category=category,
                 reason=reason,
                 points=points,
                 merit_points=merit_points
@@ -224,14 +222,15 @@ def admin_add_penalty():
                 notif = Notification(
                     user_id=student_id,
                     title='벌점 부과 알림',
-                    body=f'[{category}] {reason} - {points}점이 부과되었습니다. (현재 누적 벌점: {student.total_penalty_points + points}점)',
+                    body=f'{reason} - {points}점이 부과되었습니다. (현재 누적 벌점: {student.total_penalty_points + points}점)',
                     ntype='danger'
                 )
             else:
                 notif = Notification(
                     user_id=student_id,
                     title='상점 부여 알림',
-                    body=f'[{category}] {reason} - 상점 {merit_points}점이 부여되었습니다.',
+                    body=f'{reason} - 상점 {merit_points}점이 부여되었습니다.',
+                    
                     ntype='success'
                 )
             db.session.add(notif)

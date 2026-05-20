@@ -29,7 +29,6 @@
     {% if standards %}
       {% for s in standards %}
       <div class="standard-item">
-        <span class="std-cat">{{ s.category }}</span>
         <span class="std-desc">{{ s.description }}</span>
         <span class="std-pts {% if s.penalty_points > 0 %}text-danger{% else %}text-success{% endif %}">
           {% if s.penalty_points > 0 %}-{{ s.penalty_points }}점{% else %}+{{ s.merit_points }}점{% endif %}
@@ -57,7 +56,6 @@
     <thead>
       <tr>
         <th>날짜</th>
-        <th>구분</th>
         <th>사유</th>
         <th>점수</th>
         <th>상태</th>
@@ -68,11 +66,6 @@
       {% for p in penalties %}
       <tr>
         <td>{{ p.date }}</td>
-        <td>
-          <span class="badge-category {% if p.points > 0 %}badge-penalty{% else %}badge-merit{% endif %}">
-            {{ p.category }}
-          </span>
-        </td>
         <td>{{ p.reason }}</td>
         <td>
           {% if p.points > 0 %}<span class="text-danger">-{{ p.points }}점</span>{% endif %}
