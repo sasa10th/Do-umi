@@ -8,10 +8,10 @@
 
 <!-- 요약 카드 -->
 <div class="stats-grid">
-  <div class="stat-card {% if current_user.total_penalty_points >= 10 %}stat-danger{% elif current_user.total_penalty_points >= 5 %}stat-warning{% else %}stat-safe{% endif %}">
-    <div class="stat-label">누적 벌점</div>
-    <div class="stat-value">{{ current_user.total_penalty_points }}점</div>
-    <div class="stat-sub">{{ current_user.stage }}단계 / 최대 15점 경고</div>
+  <div class="stat-card {% if (current_user.total_merit_points - current_user.total_penalty_points) >= 10 %}stat-danger{% elif (current_user.total_merit_points - current_user.total_penalty_points) >= 5 %}stat-warning{% else %}stat-safe{% endif %}">
+    <div class="stat-label">누계 평점</div>
+    <div class="stat-value">{{current_user.total_merit_points - current_user.total_penalty_points}}점</div>
+    <div class="stat-sub">누계 평점 15점 이상시 상점 제한</div>
   </div>
 
   <div class="stat-card">
