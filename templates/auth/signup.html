@@ -70,7 +70,14 @@
         </div>
         <div class="form-group">
           <label for="password">비밀번호 <span class="required">*</span></label>
-          <input type="password" id="password" name="password" placeholder="8자 이상" required minlength="8" />
+          <div style="position: relative; width: 100%; display: flex; align-items: center;">
+            <input type="password" id="password" name="password" placeholder="8자 이상" required minlength="8" 
+                   style="width: 100%; padding-right: 110px; box-sizing: border-box; display: block;" />
+            
+            <span id="capsLockWarning" style="color: #e53e3e; display: none; position: absolute; right: 14px; font-weight: bold; font-size: 13px; pointer-events: none; z-index: 10; white-space: nowrap;">
+              ⚠️ Caps Lock 켬
+            </span>
+          </div>
         </div>
         <div class="form-group">
           <label for="password2">비밀번호 확인 <span class="required">*</span></label>
@@ -129,5 +136,25 @@
     document.getElementById("verifyStatus").textContent = `${email} 인증 완료!`;
     document.getElementById("submitBtn").disabled = false;
   }
+  document.addEventListener('DOMContentLoaded', function() {
+  const passwordInput = document.getElementById('password');
+  const warningMessage = document.getElementById('capsLockWarning');
+
+  if (passwordInput && warningMessage) {
+    // 키보드 입력 시 Caps Lock 상태 점검
+    passwordInput.addEventListener('keyup', function(event) {
+      if (event.getModifierState('CapsLock')) {
+        warningMessage.style.display = 'block'; // 켜지면 입력창 안쪽 우측 끝에 표시
+      } else {
+        warningMessage.style.display = 'none';  // 꺼지면 즉시 숨김
+      }
+    });
+
+    // 입력창 포커스가 빠져나가면 깔끔하게 사라지도록 처리
+    passwordInput.addEventListener('blur', function() {
+      warningMessage.style.display = 'none';
+    });
+  }
+});
 </script>
 {% endblock %}
