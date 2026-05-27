@@ -54,19 +54,6 @@ class User(UserMixin, db.Model):
         return sum(p.merit_points for p in self.penalties if not p.is_cancelled)
 
     @property
-    def stage(self):
-        """벌점 단계 계산 (기준표 기반)"""
-        pts = self.total_penalty_points
-        if pts < 5:
-            return 1
-        elif pts < 10:
-            return 2
-        elif pts < 15:
-            return 3
-        else:
-            return 4
-
-    @property
     def exemption_count(self):
         return self.exemptions.filter_by(is_used=False).count()
 
@@ -107,7 +94,6 @@ class Document(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    title = db.Column(db.String(100), nullable=False)
     doc_type = db.Column(db.String(50), nullable=False)  # 천자문 등
     due_date = db.Column(db.Date, nullable=False)
     original_due_date = db.Column(db.Date, nullable=True)  # 연기 전 기한
@@ -128,7 +114,7 @@ class Document(db.Model):
         return date.today() > self.due_date and not self.is_submitted
 
     def __repr__(self):
-        return f'<Document {self.title} due {self.due_date}>'
+        return f'<Document {self.doc_type} due {self.due_date}>'
 
 
 class Exemption(db.Model):
@@ -176,7 +162,6 @@ class PenaltyStandard(db.Model):
     __tablename__ = 'penalty_standards'
 
     id = db.Column(db.Integer, primary_key=True)
-    ##sub_category = db.Column(db.String(100), nullable=True)
     description = db.Column(db.String(200), nullable=False)
     penalty_points = db.Column(db.Integer, default=0)
     merit_points = db.Column(db.Integer, default=0)
