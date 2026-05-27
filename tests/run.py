@@ -16,7 +16,7 @@ def seed_db():
         admin = User(
             email='admin@sasa.hs.kr',
             name='관리자',
-            student_id='00000000',
+            student_id='99999',
             room_number='사감실',
             is_admin=True
         )
@@ -24,18 +24,18 @@ def seed_db():
         db.session.add(admin)
 
     # 테스트 학생 계정
-    student = User.query.filter_by(student_id='30402').first()
+    student = User.query.filter_by(student_id='00000').first()
 
     if not student:
         student = User(
-            email='30402@sasa.hs.kr',
-            name='김민기',
-            student_id='30402',
-            room_number='406',
+            email='guest@sasa.hs.kr',
+            name='사용자',
+            student_id='00000',
+            room_number='000',
             phone='01012345678',
-            grade=1
+            grade=0
         )
-        student.password = 'student1234'
+        student.password = 'guest1234'
         db.session.add(student)
 
     db.session.flush()  # ID 생성
@@ -140,7 +140,7 @@ def seed_db():
 
     print('◉ 시드 데이터 생성 완료')
     print(' ✦ 관리자: admin@sasa.hs.kr / admin1234')
-    print(' ✦ 학생: 30402@sasa.hs.kr / student1234')
+    print(' ✦ 학생: guest@sasa.hs.kr / guest1234')
 
 
 @app.cli.command('seed')
