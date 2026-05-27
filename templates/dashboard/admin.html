@@ -31,7 +31,7 @@
 
 /* 폼 내부 디자인 조밀하게 정리 */
 .admin-form {
-  /* 🛑 [추가] 폼 내부를 Flexbox로 만들고 높이를 100% 채웁니다 */
+  /* [추가] 폼 내부를 Flexbox로 만들고 높이를 100% 채웁니다 */
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -114,11 +114,11 @@
       <div class="form-row">
         <div class="form-group">
           <label>벌점</label>
-          <input type="number" name="points" value="0" min="0" max="15" />
+          <input type="number" name="points" value="0" min="0" max="20" />
         </div>
         <div class="form-group">
           <label>상점</label>
-          <input type="number" name="merit_points" value="0" min="0" max="15" />
+          <input type="number" name="merit_points" value="0" min="0" max="20" />
         </div>
       </div>
       <button type="submit" class="btn btn-primary">등록</button>
@@ -178,15 +178,19 @@
 
   <!-- 최근 벌점 내역 -->
   <div class="section-card admin-full">
-    <h2>최근 벌점 내역</h2>
-    <table class="data-table">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <h2 style="margin: 0; flex-shrink: 0;">최근 벌점 내역</h2>
+      <input type="text" id="penalty-search" placeholder="학번으로 검색..." style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 200px;" />
+    </div>
+    <table class="data-table" id="penalty-table">
       <thead>
-        <tr><th>날짜</th><th>학생</th><th>사유</th><th>벌점</th><th>상점</th><th>확인</th></tr>
+        <tr><th>날짜</th><th>학번</th><th>학생</th><th>사유</th><th>벌점</th><th>상점</th><th>확인</th></tr>
       </thead>
       <tbody>
         {% for p in recent_penalties %}
-        <tr>
+        <tr data-student-id="{{ p.student.student_id or '' }}">
           <td>{{ p.date }}</td>
+          <td>{{ p.student.student_id or '-' }}</td>
           <td>{{ p.student.name }}</td>
           <td>{{ p.reason }}</td>
           <td>{{ p.points }}</td>
@@ -196,6 +200,49 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+
+  <!-- 최근 천자문 과제 -->
+  <div class="section-card admin-full">
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <h2 style="margin: 0; flex-shrink: 0;">최근 천자문 과제</h2>
+      <input type="text" id="document-search" placeholder="학번으로 검색..." style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 200px;" />
+    </div>
+    {% if recent_documents %}
+    <table class="data-table" id="document-table">
+      <thead>
+        <tr><th>학번</th><th>학생</th><th>과제 유형</th><th>마감일</th><th>상태</th><th>작업</th></tr>
+      </thead>
+      <tbody>
+        {% for d in recent_documents %}
+        <tr data-student-id="{{ d.student.student_id or '' }}">
+          <td>{{ d.student.student_id or '-' }}</td>
+          <td>{{ d.student.name }}</td>
+          <td>{{ d.doc_type }}</td>
+          <td>{{ d.due_date }}</td>
+          <td>
+            {% if d.is_submitted %}
+              <span class="text-success">✔ 제출 완료</span>
+            {% elif d.is_overdue %}
+              <span class="text-danger">⚠ 기한 초과</span>
+            {% elif d.days_remaining <= 3 %}
+              <span class="text-warning">※ 기한 임박</span>
+            {% else %}
+              <span>대기 중</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('main.admin_delete_document', doc_id=d.id) }}" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">미제출 천자문 과제가 없습니다.</p>
+    {% endif %}
   </div>
 </div>
 
@@ -216,6 +263,46 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // 최근 벌점 내역 검색 기능
+  const penaltySearch = document.getElementById('penalty-search');
+  const penaltyTable = document.getElementById('penalty-table');
+  
+  if (penaltySearch && penaltyTable) {
+    penaltySearch.addEventListener('input', function(e) {
+      const searchValue = e.target.value.toLowerCase().trim();
+      const rows = penaltyTable.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const studentId = row.getAttribute('data-student-id').toLowerCase();
+        if (searchValue === '' || studentId.includes(searchValue)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  // 최근 천자문 과제 검색 기능
+  const documentSearch = document.getElementById('document-search');
+  const documentTable = document.getElementById('document-table');
+  
+  if (documentSearch && documentTable) {
+    documentSearch.addEventListener('input', function(e) {
+      const searchValue = e.target.value.toLowerCase().trim();
+      const rows = documentTable.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const studentId = row.getAttribute('data-student-id').toLowerCase();
+        if (searchValue === '' || studentId.includes(searchValue)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
 });
 </script>
 

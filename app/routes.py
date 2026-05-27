@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from .models import User, Penalty, Document, Exemption, Notification, PenaltyStandard
 from . import db
 
@@ -173,12 +173,14 @@ def admin_dashboard():
         abort(403)
 
     students = User.query.filter_by(is_admin=False).all()
-    recent_penalties = Penalty.query.order_by(Penalty.created_at.desc()).limit(20).all()
+    recent_penalties = Penalty.query.order_by(Penalty.created_at.desc()).limit(10).all()
+    recent_documents = Document.query.filter_by(is_submitted=False).order_by(Document.created_at.desc()).limit(20).all()
     total_students = len(students)
 
     return render_template('dashboard/admin.html',
                            students=students,
                            recent_penalties=recent_penalties,
+                           recent_documents=recent_documents,
                            total_students=total_students)
 
 
@@ -315,4 +317,20 @@ def admin_assign_document():
     db.session.commit()
 
     flash('천자문 과제가 등록되었습니다.', 'success')
+    return redirect(url_for('main.admin_dashboard'))
+
+
+@main.route('/admin/document/<int:doc_id>/delete', methods=['POST'])
+@login_required
+def admin_delete_document(doc_id):
+    if not current_user.is_admin:
+        abort(403)
+    
+    doc = Document.query.get_or_404(doc_id)
+    student_name = doc.student.name
+    
+    db.session.delete(doc)
+    db.session.commit()
+    
+    flash(f'{student_name} 학생의 천자문 과제가 삭제되었습니다.', 'success')
     return redirect(url_for('main.admin_dashboard'))
