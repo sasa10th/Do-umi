@@ -218,18 +218,18 @@ def admin_add_penalty():
 
             # 알림 생성
             student = User.query.get(student_id)
-            if points > 0:
+            if points > merit_points:
                 notif = Notification(
                     user_id=student_id,
                     title='벌점 부과 알림',
-                    body=f'{reason} - {points}점이 부과되었습니다. (현재 누적 벌점: {student.total_penalty_points + points}점)',
+                    body=f'{reason} - 벌점 {points-merit_points}점이 부과되었습니다.',
                     ntype='danger'
-                )
+                )   
             else:
                 notif = Notification(
                     user_id=student_id,
-                    title='상점 부여 알림',
-                    body=f'{reason} - 상점 {merit_points}점이 부여되었습니다.',
+                    title='상점 부과 알림',
+                    body=f'{reason} - 상점 {merit_points-points}점이 부과되었습니다.',
                     
                     ntype='success'
                 )
