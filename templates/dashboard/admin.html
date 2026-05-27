@@ -25,6 +25,16 @@
   flex: 1 1 calc(33.333% - 14px);
   min-width: 320px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 폼 내부 디자인 조밀하게 정리 */
+.admin-form {
+  /* 🛑 [추가] 폼 내부를 Flexbox로 만들고 높이를 100% 채웁니다 */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 /* 폼 내부 디자인 조밀하게 정리 */
@@ -34,6 +44,9 @@
 .admin-form input, .admin-form select {
   width: 100%;
   padding: 8px 10px;
+}
+.admin-form .btn {
+  margin-top: auto;
 }
 </style>
 <div class="page-header">
