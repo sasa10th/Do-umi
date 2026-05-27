@@ -121,7 +121,7 @@
         <select name="student_id" required>
           <option value="">-- 학생 선택 --</option>
           {% for s in students %}
-          <option value="{{ s.id }}">{{ s.name }}</option>
+          <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id or s.email }})</option>
           {% endfor %}
         </select>
       </div>
@@ -146,7 +146,7 @@
         <select name="student_id" required>
           <option value="">-- 학생 선택 --</option>
           {% for s in students %}
-          <option value="{{ s.id }}">{{ s.name }}</option>
+          <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id or s.email }})</option>
           {% endfor %}
         </select>
       </div>
