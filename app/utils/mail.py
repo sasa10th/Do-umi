@@ -11,11 +11,9 @@ PENALTY_TEMPLATE = """
 벌점이 부과되었습니다.
 
 - 일자: {{ penalty.date }}
-- 분류: {{ penalty.category }}
 - 사유: {{ penalty.reason }}
 - 부과 점수: {{ penalty.points }}점
 - 현재 누적 벌점: {{ student.total_penalty_points }}점
-- 현재 단계: {{ student.stage }}단계
 
 벌점 내역 확인 및 전자서명은 Do우미 시스템에서 진행해주세요.
 
@@ -30,7 +28,6 @@ MERIT_TEMPLATE = """
 상점이 부여되었습니다.
 
 - 일자: {{ penalty.date }}
-- 분류: {{ penalty.category }}
 - 사유: {{ penalty.reason }}
 - 부여 상점: {{ penalty.merit_points }}점
 

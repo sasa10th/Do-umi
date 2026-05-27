@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import login_required, current_user
 from datetime import date, datetime
 from .models import User, Penalty, Document, Exemption, Notification, PenaltyStandard
@@ -236,11 +236,12 @@ def admin_add_penalty():
             db.session.add(notif)
             db.session.commit()
 
+            # 메일 발송
             from .utils.mail import send_penalty_notification
             try:
                 send_penalty_notification(student, penalty)
-            except Exception:
-                pass
+            except Exception as e:
+                current_app.logger.warning(f'벌점 메일 발송 실패: {e}')
 
             flash('벌점/상점이 등록되었습니다.', 'success')
             return redirect(url_for('main.admin_dashboard'))
