@@ -185,4 +185,25 @@
     </table>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 페이지 내의 모든 admin-form 클래스를 가진 폼을 찾습니다.
+  const forms = document.querySelectorAll('.admin-form');
+  
+  forms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+      // 폼 내의 submit 버튼을 찾습니다.
+      const submitButton = form.querySelector('button[type="submit"]');
+      
+      if (submitButton) {
+        // 버튼을 비활성화하고 문구를 '처리 중...'으로 변경합니다.
+        submitButton.disabled = true;
+        submitButton.innerText = '처리 중...';
+      }
+    });
+  });
+});
+</script>
+
 {% endblock %}
