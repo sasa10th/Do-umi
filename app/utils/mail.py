@@ -13,7 +13,7 @@ PENALTY_TEMPLATE = """
 - 일자: {{ penalty.date }}
 - 사유: {{ penalty.reason }}
 - 부과 점수: {{ penalty.points }}점
-- 현재 누적 벌점: {{ student.total_penalty_points }}점
+- 현재 누계 평점: {{ student.total_merit_points - student.total_penalty_points }}점
 
 벌점 내역 확인 및 전자서명은 Do우미 시스템에서 진행해주세요.
 
@@ -30,6 +30,7 @@ MERIT_TEMPLATE = """
 - 일자: {{ penalty.date }}
 - 사유: {{ penalty.reason }}
 - 부여 상점: {{ penalty.merit_points }}점
+- 현재 누계 평점: {{ student.total_merit_points - student.total_penalty_points }}점
 
 Do우미 시스템에서 상세 내역을 확인하세요.
 """
