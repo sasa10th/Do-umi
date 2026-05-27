@@ -46,6 +46,7 @@
   padding: 8px 10px;
 }
 .admin-form .btn {
+  display: flex;
   margin-top: auto;
 }
 </style>
@@ -246,62 +247,182 @@
   </div>
 </div>
 
+<!-- 시험 기간 관리 -->
+<div class="section-card admin-full">
+  <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem">
+    <i class="ti ti-calendar-event" style="font-size:18px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+    시험 기간 관리
+  </h3>
+
+  <form method="POST" action="{{ url_for('main.admin_add_exam_period') }}" class="admin-form" style="flex-direction:row;align-items:flex-end;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" name="name" placeholder="예) 2025년 1학기 중간고사" style="width:260px" required />
+    </div>
+    <div class="form-group">
+      <label>시작일</label>
+      <input type="date" name="start_date" required />
+    </div>
+    <span style="color:var(--color-text-tertiary);font-size:13px;padding-bottom:8px">—</span>
+    <div class="form-group">
+      <label>종료일</label>
+      <input type="date" name="end_date" required />
+    </div>
+    <div class="form-group">
+      <label style="visibility:hidden">등록</label>
+      <button type="submit" class="btn btn-sm" style="height:36px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-plus" style="font-size:14px" aria-hidden="true"></i> 등록
+      </button>
+    </div>
+  </form>
+
+  {% if exam_periods %}
+  <div style="display:flex;flex-direction:column;gap:8px">
+    {% for ep in exam_periods %}
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:0.5px solid {% if ep.is_active %}#1D9E75{% else %}var(--color-border-tertiary){% endif %};border-radius:var(--border-radius-md);background:{% if ep.is_active %}#E1F5EE{% else %}var(--color-background-secondary){% endif %}">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:500;color:{% if ep.is_active %}#085041{% else %}var(--color-text-primary){% endif %}">{{ ep.name }}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">{{ ep.start_date }} — {{ ep.end_date }}</div>
+      </div>
+      {% if ep.is_active %}
+        <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;background:#9FE1CB;color:#085041">진행 중</span>
+      {% elif ep.end_date < today %}
+        <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)">종료</span>
+      {% else %}
+        <span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;background:#FAC775;color:#412402">예정</span>
+      {% endif %}
+      <form method="POST" action="{{ url_for('main.admin_delete_exam_period', period_id=ep.id) }}"
+            onsubmit="return confirm('삭제하시겠습니까?')" style="margin:0">
+        <button type="submit" style="height:28px;padding:0 10px;background:transparent;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:4px" onmouseover="this.style.borderColor='#E24B4A';this.style.color='#A32D2D';this.style.background='#FCEBEB'" onmouseout="this.style.borderColor='';this.style.color='';this.style.background='transparent'">
+          <i class="ti ti-trash" style="font-size:13px" aria-hidden="true"></i> 삭제
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="font-size:13px;color:var(--color-text-tertiary);text-align:center;padding:1rem 0">등록된 시험 기간이 없습니다.</p>
+  {% endif %}
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // 페이지 내의 모든 admin-form 클래스를 가진 폼을 찾습니다.
   const forms = document.querySelectorAll('.admin-form');
   
   forms.forEach(form => {
     form.addEventListener('submit', function(e) {
-      // 폼 내의 submit 버튼을 찾습니다.
       const submitButton = form.querySelector('button[type="submit"]');
-      
       if (submitButton) {
-        // 버튼을 비활성화하고 문구를 '처리 중...'으로 변경합니다.
         submitButton.disabled = true;
         submitButton.innerText = '처리 중...';
       }
     });
   });
 
-  // 최근 벌점 내역 검색 기능
-  const penaltySearch = document.getElementById('penalty-search');
-  const penaltyTable = document.getElementById('penalty-table');
-  
-  if (penaltySearch && penaltyTable) {
-    penaltySearch.addEventListener('input', function(e) {
-      const searchValue = e.target.value.toLowerCase().trim();
-      const rows = penaltyTable.querySelectorAll('tbody tr');
-      
-      rows.forEach(row => {
-        const studentId = row.getAttribute('data-student-id').toLowerCase();
-        if (searchValue === '' || studentId.includes(searchValue)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    });
+  function debounce(fn, wait) {
+    let t;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
   }
 
-  // 최근 천자문 과제 검색 기능
+  // ── 벌점 검색 ────────────────────────────────────────────
+  const penaltySearch = document.getElementById('penalty-search');
+  const penaltyTable = document.getElementById('penalty-table');
+
+  async function fetchPenaltyResults(q) {
+    const url = '/admin/search/penalties?q=' + encodeURIComponent(q);
+    try {
+      const res = await fetch(url, {credentials: 'same-origin'});
+      if (!res.ok) throw new Error('검색 실패');
+      const data = await res.json();
+      const tbody = penaltyTable.querySelector('tbody');
+      tbody.innerHTML = '';
+      data.results.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.date}</td>
+          <td>${p.student_id || '-'}</td>
+          <td>${p.student_name || ''}</td>
+          <td>${p.reason || ''}</td>
+          <td>${p.points}</td>
+          <td>${p.merit_points}</td>
+          <td>${p.is_confirmed ? '✔' : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  if (penaltySearch && penaltyTable) {
+    const initialPenaltyHTML = penaltyTable.querySelector('tbody').innerHTML;
+
+    const handler = debounce(function(e) {
+      const q = e.target.value.trim();
+      if (!q) {
+        penaltyTable.querySelector('tbody').innerHTML = initialPenaltyHTML;
+        return;
+      }
+      fetchPenaltyResults(q);
+    }, 300);
+    penaltySearch.addEventListener('input', handler);
+  }
+
+  // ── 천자문 검색 ────────────────────────────────────────────
   const documentSearch = document.getElementById('document-search');
   const documentTable = document.getElementById('document-table');
-  
-  if (documentSearch && documentTable) {
-    documentSearch.addEventListener('input', function(e) {
-      const searchValue = e.target.value.toLowerCase().trim();
-      const rows = documentTable.querySelectorAll('tbody tr');
-      
-      rows.forEach(row => {
-        const studentId = row.getAttribute('data-student-id').toLowerCase();
-        if (searchValue === '' || studentId.includes(searchValue)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
+
+  async function fetchDocumentResults(q) {
+    const url = '/admin/search/documents?q=' + encodeURIComponent(q);
+    try {
+      const res = await fetch(url, {credentials: 'same-origin'});
+      if (!res.ok) throw new Error('검색 실패');
+      const data = await res.json();
+      const tbody = documentTable.querySelector('tbody');
+      tbody.innerHTML = '';
+      data.results.forEach(d => {
+        const tr = document.createElement('tr');
+        const status = d.is_submitted
+          ? '<span class="text-success">✔ 제출 완료</span>'
+          : (d.is_overdue
+            ? '<span class="text-danger">⚠ 기한 초과</span>'
+            : (d.days_remaining <= 3
+              ? '<span class="text-warning">※ 기한 임박</span>'
+              : '<span>대기 중</span>'));
+        tr.innerHTML = `
+          <td>${d.student_id || '-'}</td>
+          <td>${d.student_name || ''}</td>
+          <td>${d.doc_type || ''}</td>
+          <td>${d.due_date || ''}</td>
+          <td>${status}</td>
+          <td>
+            <form method="POST" action="/admin/document/${d.id}/delete" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
+            </form>
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
-    });
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  if (documentSearch && documentTable) {
+    const initialDocumentHTML = documentTable.querySelector('tbody').innerHTML;
+
+    const handler = debounce(function(e) {
+      const q = e.target.value.trim();
+      if (!q) {
+        documentTable.querySelector('tbody').innerHTML = initialDocumentHTML;
+        return;
+      }
+      fetchDocumentResults(q);
+    }, 300);
+    documentSearch.addEventListener('input', handler);
   }
 });
 </script>

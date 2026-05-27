@@ -138,6 +138,23 @@ class Exemption(db.Model):
     def __repr__(self):
         return f'<Exemption {self.id} used={self.is_used}>'
 
+    
+class ExamPeriod(db.Model):
+    __tablename__ = 'exam_periods'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)          # ex) "2025년 1학기 중간고사"
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    created_by = db.relationship('User', foreign_keys=[created_by_id])
+
+    @property
+    def is_active(self):
+        return self.start_date <= date.today() <= self.end_date
+
 
 class Notification(db.Model):
     """알림 내역"""

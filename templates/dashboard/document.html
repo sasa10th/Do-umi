@@ -58,10 +58,14 @@
         {% endif %}
 
         {% if not doc.is_extended %}
-        <form method="POST" action="{{ url_for('main.delay_document', doc_id=doc.id) }}"
-              onsubmit="return confirm('시험 기간으로 2주 연기하시겠습니까?')">
-          <button type="submit" class="btn btn-sm">기한 연기</button>
-        </form>
+          {% if exam_period %}
+          <form method="POST" action="{{ url_for('main.delay_document', doc_id=doc.id) }}"
+                onsubmit="return confirm('{{ exam_period.name }} 기간으로 2주 연기하시겠습니까?')">
+            <button type="submit" class="btn btn-sm">기한 연기</button>
+          </form>
+          {% else %}
+          <button class="btn btn-sm" disabled title="시험 기간 2주 전부터 연기 가능합니다.">기한 연기</button>
+          {% endif %}
         {% endif %}
       </div>
       {% endif %}
