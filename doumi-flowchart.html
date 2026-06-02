@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Do-umi 흐름도</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #fff;
+      font-family: 'Pretendard', 'Courier New', monospace;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: #111;
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+      font-weight: bold;
+    }
+
+    p.sub {
+      color: #555;
+      text-align: center;
+      font-size: 0.82rem;
+      margin-bottom: 24px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+      font-size: 0.78rem;
+    }
+
+    .chart-wrap {
+      background: #fff;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 32px;
+      overflow: auto;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .mermaid {
+      min-width: 900px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Do-umi 시스템 통합 흐름도</h1>
+  <p class="sub">회원가입 · 로그인 · 벌점 · 천자문 · 알림 · 마이페이지 · 로그아웃</p>
+
+  <div class="legend">
+    <div class="legend-item">
+      <!-- terminal: 둥근 직사각형, fill:#111, stroke:#111, color:#fff -->
+      <svg width="56" height="26">
+        <rect x="2" y="3" width="52" height="20" rx="10" ry="10" fill="#111" stroke="#111" stroke-width="1.5"/>
+        <text x="28" y="17" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace">시작/종료</text>
+      </svg>
+      시작/종료
+    </div>
+    <div class="legend-item">
+      <!-- process: 직사각형, fill:#fff, stroke:#666, color:#111 -->
+      <svg width="56" height="26">
+        <rect x="2" y="3" width="52" height="20" fill="#fff" stroke="#666" stroke-width="1.5"/>
+        <text x="28" y="17" text-anchor="middle" fill="#111" font-size="9" font-family="monospace">프로세스</text>
+      </svg>
+      일반 프로세스
+    </div>
+    <div class="legend-item">
+      <!-- decision: 마름모, fill:#ddd, stroke:#666, color:#111 -->
+      <svg width="56" height="32">
+        <polygon points="28,2 54,16 28,30 2,16" fill="#ddd" stroke="#666" stroke-width="1.5"/>
+        <text x="28" y="20" text-anchor="middle" fill="#111" font-size="9" font-family="monospace">조건</text>
+      </svg>
+      분기/조건
+    </div>
+    <div class="legend-item">
+      <!-- db: 위 닫힌 타원, 아래 오목한 호, 몸통 채움 -->
+      <svg width="44" height="30">
+        <!-- 몸통: 사다리꼴+아래오목호로 닫힌 면 -->
+        <path d="M4,8 L4,22 A18,5 0 0,0 40,22 L40,8" fill="#aaa" stroke="none"/>
+        <!-- 좌우 테두리 -->
+        <line x1="4"  y1="8" x2="4"  y2="22" stroke="#666" stroke-width="1.5"/>
+        <line x1="40" y1="8" x2="40" y2="22" stroke="#666" stroke-width="1.5"/>
+        <!-- 아래 오목한 호 -->
+        <path d="M4,22 A18,5 0 0,0 40,22" fill="none" stroke="#666" stroke-width="1.5"/>
+        <!-- 위 닫힌 타원 -->
+        <ellipse cx="22" cy="8" rx="18" ry="5" fill="#bbb" stroke="#666" stroke-width="1.5"/>
+        <text x="22" y="20" text-anchor="middle" fill="#111" font-size="9" font-family="monospace">DB</text>
+      </svg>
+      DB 저장/조회
+    </div>
+    <div class="legend-item">
+      <!-- system: 이중 직사각형([[...]]), fill:#666, stroke:#444, color:#fff -->
+      <svg width="64" height="30">
+        <rect x="2"  y="5" width="60" height="20" fill="#666" stroke="#444" stroke-width="1.5"/>
+        <line x1="7"  y1="5" x2="7"  y2="25" stroke="#444" stroke-width="1.5"/>
+        <line x1="57" y1="5" x2="57" y2="25" stroke="#444" stroke-width="1.5"/>
+        <text x="32" y="19" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace">주요화면</text>
+      </svg>
+      주요 화면
+    </div>
+    <div class="legend-item">
+      <!-- api: 평행사변형 좌우대칭, fill:#888, stroke:#555, color:#fff -->
+      <svg width="60" height="26">
+        <polygon points="2,23 48,23 58,3 12,3" fill="#888" stroke="#555" stroke-width="1.5"/>
+        <text x="30" y="17" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace">API</text>
+      </svg>
+      API 호출
+    </div>
+    <div class="legend-item">
+      <!-- alert: 직사각형, fill:#333, stroke:#111, color:#fff -->
+      <svg width="56" height="26">
+        <rect x="2" y="3" width="52" height="20" fill="#333" stroke="#111" stroke-width="1.5"/>
+        <text x="28" y="17" text-anchor="middle" fill="#fff" font-size="9" font-family="monospace">경고/오류</text>
+      </svg>
+      경고/오류
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="mermaid">
+      flowchart TD
+      A([사용자 접근]):::terminal --> B{로그인 상태?}:::decision
+      B -->|아니오| C[로그인 페이지]:::process
+      B -->|회원가입| REG[회원가입 페이지]:::process
+      REG --> REG1[이메일/비밀번호/이름 입력]:::process
+      REG1 --> REG2{유효성 검증}:::decision
+      REG2 -->|도메인 오류| REG3[@sasa.hs.kr만 허용]:::alert
+      REG2 -->|이메일 중복| REG4[중복 이메일 경고]:::alert
+      REG2 -->|비밀번호 8자 미만| REG5[비밀번호 길이 오류]:::alert
+      REG3 --> REG1
+      REG4 --> REG1
+      REG5 --> REG1
+      REG2 -->|성공| REG6[(User 레코드 생성)]:::db
+      REG6 --> REG7[회원가입 완료 메시지]:::process
+      REG7 --> C
+
+      C --> D[이메일 / 비밀번호 입력]:::process
+      D --> E{계정 검증}:::decision
+      E -->|실패| F[오류 메시지 표시]:::alert
+      F --> D
+      E -->|성공| G[(세션 생성)]:::db
+      G --> H[[대시보드]]:::system
+      B -->|예| H
+
+      H --> C1[최근 벌점 3건 표시]:::process
+      H --> C2[미제출 천자문 표시]:::process
+      H --> C3[미읽음 알림 수 표시]:::process
+
+      C1 --> C1A[/API: /api/penalties 호출/]:::api
+      C2 --> C2A[/API: /api/documents 호출/]:::api
+      C3 --> C3A[/API: /api/notifications/unread-count/]:::api
+      C1A --> C1B[페이지 렌더링]:::process
+      C2A --> C2B[페이지 렌더링]:::process
+      C3A --> C3B[페이지 렌더링]:::process
+
+      C1B --> S1{벌점 확인?}:::decision
+      S1 -->|예| S2[벌점 페이지 이동]:::process
+      S2 --> S2A{정렬 옵션 선택?}:::decision
+      S2A -->|날짜 최신순| S2B[sort=date_desc]:::process
+      S2A -->|날짜 오래된순| S2C[sort=date_asc]:::process
+      S2A -->|점수 높은순| S2D[sort=points_desc]:::process
+      S2A -->|점수 낮은순| S2E[sort=points_asc]:::process
+      S2B --> S3[DB에서 정렬된 벌점 조회]:::process
+      S2C --> S3
+      S2D --> S3
+      S2E --> S3
+      S3 --> S4[취소되지 않은 벌점만 필터링]:::process
+      S4 --> S5[벌점 목록 렌더링]:::process
+
+      S5 --> SIG1{미확인 벌점 선택?}:::decision
+      SIG1 -->|예| SIG2[벌점 상세 페이지]:::process
+      SIG2 --> SIG3[서명 캔버스 활성화]:::process
+      SIG3 --> SIG4[Canvas에 서명 그리기]:::process
+      SIG4 --> SIG5{서명 유효?}:::decision
+      SIG5 -->|아니오| SIG6[유효성 오류 메시지]:::alert
+      SIG6 --> SIG4
+      SIG5 -->|예| SIG7[base64 인코딩]:::process
+      SIG7 --> SIG8[validate_signature 검사]:::process
+      SIG8 --> SIG9{검증 성공?}:::decision
+      SIG9 -->|실패| SIG6
+      SIG9 -->|성공| SIG10[(confirm_penalty POST 저장)]:::db
+      SIG10 --> SIG11[is_confirmed = True]:::process
+      SIG11 --> SIG12[student_signature 저장]:::process
+      SIG12 --> SIG13[confirmed_at 기록]:::process
+      SIG13 --> SIG14[확인 완료 메시지]:::process
+
+      S5 --> SCH{검색 기능 사용?}:::decision
+      SCH -->|예| SCH1[검색어 입력]:::process
+      SCH1 --> SCH2[/API: /api/search?q=keyword/]:::api
+      SCH2 --> SCH3[벌점 사유 부분 검색]:::process
+      SCH3 --> SCH4[천자문 제목 부분 검색]:::process
+      SCH4 --> SCH5[/검색 결과 JSON 반환/]:::api
+      SCH5 --> SCH6[클라이언트에서 결과 표시]:::process
+
+      C2B --> T1{천자문 확인?}:::decision
+      T1 -->|예| T1A[/API: /api/documents 호출/]:::api
+      T1A --> T2{시험 기간 2주 내?}:::decision
+      T2 -->|아니오| T3[일반 상태 표시]:::process
+      T2 -->|예| T3A[연기 가능 상태 활성화]:::process
+      T3 --> T4[미제출 문서 목록 표시]:::process
+      T3A --> T4
+      T4 --> T5{행동 선택?}:::decision
+      T5 -->|제출| T6[기한 내 제출 권유]:::alert
+      T5 -->|연기 요청| T7{면제권 보유?}:::decision
+      T7 -->|아니오| T8[면제권 없음 경고]:::alert
+      T7 -->|예| T9[면제권 사용]:::process
+      T9 --> T10[(extend_document POST)]:::db
+      T10 --> T11[Exemption.is_used = True]:::process
+      T11 --> T12[Document.is_submitted = True]:::process
+      T12 --> T13[used_at, used_for_document_id 기록]:::process
+      T13 --> T14[연기 완료 메시지]:::process
+
+      T5 -->|시험 기간 연기| DELAY1[delay_document 검증]:::process
+      DELAY1 --> DELAY2{시험 기간 확인?}:::decision
+      DELAY2 -->|아니오| DELAY3[시험 기간 아님 경고]:::alert
+      DELAY2 -->|예| DELAY4[(Document.due_date 연장)]:::db
+      DELAY4 --> DELAY5[original_due_date 저장]:::process
+      DELAY5 --> DELAY6[연기 완료]:::process
+
+      C3B --> N1{알림 확인?}:::decision
+      N1 -->|예| N2[/API: /api/notifications/]:::api
+      N2 --> N3[알림 목록 조회]:::process
+      N3 --> N4{개별 알림 클릭?}:::decision
+      N4 -->|예| N5[/API: mark-read POST/]:::api
+      N5 --> N6[(알림 읽음 처리)]:::db
+      N6 --> N7[is_read = True 업데이트]:::process
+      N7 --> N8[알림 목록 갱신]:::process
+
+      H --> API1{사용자 정보 필요?}:::decision
+      API1 -->|예| API2[/API: /api/me 호출/]:::api
+      API2 --> API3[id, name, email, 총벌점, 총상점, 면제권수]:::process
+
+      C3 --> MP1{마이페이지 방문?}:::decision
+      MP1 -->|예| MP2[profile.html 이동]:::process
+      MP2 --> MP3[사용자 정보 표시]:::process
+      MP3 --> MP4[전자서명 저장 상태 표시]:::process
+
+      H --> LO1{로그아웃?}:::decision
+      LO1 -->|예| LO2[logout 엔드포인트]:::process
+      LO2 --> LO3[(세션 종료)]:::db
+      LO3 --> LO4[로그인 페이지 리다이렉트]:::process
+
+      SIG14 --> UPDATE1[학생 페이지 갱신]:::process
+      T14 --> UPDATE1
+      DELAY6 --> UPDATE1
+      N8 --> UPDATE1
+      LO4 --> END([로그아웃 완료]):::terminal
+      UPDATE1 --> END
+
+      classDef terminal fill:#111,stroke:#111,color:#fff
+      classDef process fill:#fff,stroke:#666,color:#111
+      classDef decision fill:#ddd,stroke:#666,color:#111
+      classDef db fill:#aaa,stroke:#666,color:#111
+      classDef system fill:#666,stroke:#444,color:#fff
+      classDef alert fill:#333,stroke:#111,color:#fff
+      classDef api fill:#888,stroke:#555,color:#fff
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'base', flowchart: { curve: 'basis', padding: 20 } });
+  </script>
+</body>
+
+</html>
