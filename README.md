@@ -79,7 +79,8 @@ Do-umi/
 ├── .gitignore
 ├── config.py               # 환경별 설정 클래스 (Dev/Prod/Test)
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+└── doumi-flowchart.html
 ```
 
 ## 5. 실행
