@@ -769,10 +769,10 @@ a { text-decoration: none; color: inherit; }
   .topbar { padding: 0 20px; }
   .auth-left { display: none; }
   .auth-right { width: 100%; padding: 32px 20px; }
-  .kpi-row { flex-direction: column; gap: 0; }
-  .kpi-hero { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; margin-right: 0; padding-bottom: 20px; margin-bottom: 20px; }
-  .kpi-mini { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; margin-right: 0; padding-bottom: 20px; margin-bottom: 20px; }
-  .kpi-mini:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .kpi-hero { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; margin-right: 0; padding-bottom: 20px; margin-bottom: 0; }
+  .kpi-mini { flex: 1; border-right: none; border-bottom: none; padding-right: 16px; margin-right: 0; padding-top: 20px; padding-bottom: 0; margin-bottom: 0; }
+  .kpi-mini:not(:last-child) { border-right: 1px solid var(--border); }
+  .kpi-mini:last-child { border-right: none; padding-right: 0; padding-left: 16px; margin-right: 0; }
   .shortcut-grid { flex-direction: column; gap: 16px; }
   .shortcut-card { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
   .shortcut-card:last-child { border-bottom: none; padding-bottom: 0; }
