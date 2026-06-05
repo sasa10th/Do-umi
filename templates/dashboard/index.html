@@ -3,40 +3,59 @@
 
 {% block content %}
 <div class="page-header">
-  <h1 class="page-title">대시보드</h1>
+  <div class="page-title-group">
+    <h1 class="page-title">대시보드</h1>
+    <p class="page-meta">{{ current_user.name }}님의 기숙사 상벌점 현황</p>
+  </div>
 </div>
 
-<!-- 요약 카드 -->
-<div class="stats-grid">
-  <div class="stat-card {% if (current_user.total_merit_points - current_user.total_penalty_points) >= 10 %}stat-danger{% elif (current_user.total_merit_points - current_user.total_penalty_points) >= 5 %}stat-warning{% else %}stat-safe{% endif %}">
-    <div class="stat-label">누계 평점</div>
-    <div class="stat-value">{{current_user.total_merit_points - current_user.total_penalty_points}}점</div>
-    <div class="stat-sub">누계 평점 15점 이상시 상점 제한</div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-label">천자문 현황</div>
-    <div class="stat-value">{{ current_user.documents | selectattr('is_submitted', 'equalto', False) | list | length }}건</div>
-    <div class="stat-sub">
-      {% if upcoming_docs %}
-        {{ upcoming_docs.due_date }} 마감
-      {% else %}
-        진행 중인 과제 없음
-      {% endif %}
+<!-- KPI 섹션 -->
+{% set net_score = current_user.total_merit_points - current_user.total_penalty_points %}
+<div class="kpi-row">
+  <!-- 누계 평점 — 메인 카드 -->
+  <div class="kpi-hero {% if net_score >= 10 %}kpi-danger{% elif net_score >= 5 %}kpi-warn{% endif %}">
+    <span class="kpi-tag">누계 평점</span>
+    <div class="kpi-num">{{ net_score }}점</div>
+    <div class="kpi-sub">15점 이상 시 상점 제한</div>
+    <div class="kpi-breakdown">
+      <div class="kpi-breakdown-item">
+        <div class="kpi-breakdown-val penalty">{{ current_user.total_penalty_points }}점</div>
+        <div class="kpi-breakdown-label">벌점</div>
+      </div>
+      <div class="kpi-breakdown-item">
+        <div class="kpi-breakdown-val merit">{{ current_user.total_merit_points }}점</div>
+        <div class="kpi-breakdown-label">상점</div>
+      </div>
     </div>
   </div>
 
-  <div class="stat-card">
-    <div class="stat-label">천자문 면제권</div>
-    <div class="stat-value">{{ current_user.exemption_count }}개</div>
-    <div class="stat-sub">프로필에서 등록</div>
-  </div>
+  <!-- 천자문 현황 -->
+  <a href="{{ url_for('main.documents') }}" class="kpi-mini">
+    <div class="kpi-mini-icon"><i class="bi bi-journal-text"></i></div>
+    <div>
+      <div class="kpi-mini-num">{{ current_user.documents | selectattr('is_submitted', 'equalto', False) | list | length }}건</div>
+      <div class="kpi-mini-label">천자문 미제출</div>
+      <div class="kpi-mini-sub">
+        {% if upcoming_docs %}{{ upcoming_docs.due_date }} 마감{% else %}진행 중인 과제 없음{% endif %}
+      </div>
+    </div>
+  </a>
+
+  <!-- 면제권 보유 -->
+  <a href="{{ url_for('main.documents') }}" class="kpi-mini">
+    <div class="kpi-mini-icon"><i class="bi bi-ticket-perforated"></i></div>
+    <div>
+      <div class="kpi-mini-num">{{ current_user.exemption_count }}개</div>
+      <div class="kpi-mini-label">천자문 면제권</div>
+      <div class="kpi-mini-sub">프로필에서 등록</div>
+    </div>
+  </a>
 </div>
 
 <!-- 최근 벌점 내역 -->
 <div class="section-card">
   <div class="section-header">
-    <h2>최근 3건</h2>
+    <h2>최근 내역</h2>
     <a href="{{ url_for('main.penalties') }}" class="link-more">전체 내역 보기 →</a>
   </div>
 
@@ -82,21 +101,32 @@
 </div>
 
 <!-- 바로가기 -->
-<div class="shortcut-grid">
-  <a href="{{ url_for('main.penalties') }}" class="shortcut-card">
-    <span class="shortcut-icon"><i class="bi bi-bar-chart-line"></i></span>
-    <span class="shortcut-label">벌점 현황</span>
-    <span class="shortcut-desc">나의 누적 벌점 및 상점 내역</span>
-  </a>
-  <a href="{{ url_for('main.documents') }}" class="shortcut-card">
-    <span class="shortcut-icon"><i class="bi bi-vector-pen"></i></span>
-    <span class="shortcut-label">천자문 기한</span>
-    <span class="shortcut-desc">제출 날짜 및 면제 신청 관리</span>
-  </a>
-  <a href="{{ url_for('auth.profile') }}" class="shortcut-card">
-    <span class="shortcut-icon"><i class="bi bi-person-circle"></i></span>
-    <span class="shortcut-label">프로필</span>
-    <span class="shortcut-desc">계정 정보 및 설정</span>
-  </a>
+<div class="section-card">
+  <div class="section-header">
+    <h2>바로가기</h2>
+  </div>
+  <div class="shortcut-grid">
+    <a href="{{ url_for('main.penalties') }}" class="shortcut-card">
+      <div class="shortcut-icon"><i class="bi bi-bar-chart-line"></i></div>
+      <div class="shortcut-text">
+        <span class="shortcut-label">벌점 현황</span>
+        <span class="shortcut-desc">나의 누적 벌점 및 상점 내역</span>
+      </div>
+    </a>
+    <a href="{{ url_for('main.documents') }}" class="shortcut-card">
+      <div class="shortcut-icon"><i class="bi bi-vector-pen"></i></div>
+      <div class="shortcut-text">
+        <span class="shortcut-label">천자문 기한</span>
+        <span class="shortcut-desc">제출 날짜 및 면제 신청 관리</span>
+      </div>
+    </a>
+    <a href="{{ url_for('auth.profile') }}" class="shortcut-card">
+      <div class="shortcut-icon"><i class="bi bi-person-circle"></i></div>
+      <div class="shortcut-text">
+        <span class="shortcut-label">프로필</span>
+        <span class="shortcut-desc">계정 정보 및 서명 설정</span>
+      </div>
+    </a>
+  </div>
 </div>
 {% endblock %}

@@ -6,19 +6,19 @@
   <h1 class="page-title">본인 벌점 현황</h1>
 </div>
 
-<!-- 벌점 요약 -->
-<div class="penalty-summary">
-  <div class="summary-item">
-    <div class="summary-label">벌점</div>
-    <div class="summary-value text-danger">{{ current_user.total_penalty_points }}점</div>
+<!-- 벌점 배너 -->
+<div class="penalty-banner">
+  <div class="pb-item">
+    <span class="pb-label">벌점</span>
+    <div class="pb-value penalty">{{ current_user.total_penalty_points }}점</div>
   </div>
-  <div class="summary-item">
-    <div class="summary-label">상점</div>
-    <div class="summary-value text-success">{{ current_user.total_merit_points }}점</div>
+  <div class="pb-item">
+    <span class="pb-label">상점</span>
+    <div class="pb-value merit">{{ current_user.total_merit_points }}점</div>
   </div>
-  <div class="summary-item">
-    <div class="summary-label">누계 평점</div>
-    <div class="summary-value">{{ current_user.total_merit_points - current_user.total_penalty_points }}점</div>
+  <div class="pb-item">
+    <span class="pb-label">누계 평점</span>
+    <div class="pb-value">{{ current_user.total_merit_points - current_user.total_penalty_points }}점</div>
   </div>
 </div>
 

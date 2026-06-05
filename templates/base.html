@@ -15,9 +15,9 @@
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <span class="logo-text">Do우미</span>
-      <span class="logo-sub">SASA 기숙사 상벌점 시스템</span>
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Do우미" class="sidebar-logo-img" />
     </div>
+    <div class="sidebar-logo-divider"></div>
 
     <nav class="sidebar-nav">
       <a href="{{ url_for('main.dashboard') }}" class="nav-item {% if request.endpoint == 'main.dashboard' %}active{% endif %}">
@@ -58,11 +58,15 @@
     </div>
   </aside>
 
+  <!-- 모바일 사이드바 오버레이 -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
   <!-- Main content -->
   <div class="main-content">
     <header class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-search">
+        <i class="bi bi-search topbar-search-icon"></i>
         <input type="text" id="searchInput" placeholder="벌점·천자문 검색…" autocomplete="off" />
         <div id="searchResults" class="search-dropdown"></div>
       </div>
