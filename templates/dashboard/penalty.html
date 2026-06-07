@@ -10,15 +10,33 @@
 <div class="penalty-banner">
   <div class="pb-item">
     <span class="pb-label">벌점</span>
-    <div class="pb-value penalty">{{ current_user.total_penalty_points }}점</div>
+    <div class="pb-value penalty" data-count-up>{{ current_user.total_penalty_points }}점</div>
   </div>
   <div class="pb-item">
     <span class="pb-label">상점</span>
-    <div class="pb-value merit">{{ current_user.total_merit_points }}점</div>
+    <div class="pb-value merit" data-count-up>{{ current_user.total_merit_points }}점</div>
   </div>
   <div class="pb-item">
     <span class="pb-label">누계 평점</span>
-    <div class="pb-value">{{ current_user.total_merit_points - current_user.total_penalty_points }}점</div>
+    <div class="pb-value" data-count-up>{{ current_user.total_merit_points - current_user.total_penalty_points }}점</div>
+  </div>
+</div>
+
+<!-- 통계 차트 -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>통계</h2>
+  </div>
+  <div class="stats-charts">
+    <div class="chart-card">
+      <h3 class="chart-title">최근 6개월 추이</h3>
+      <div class="chart-canvas-wrap"><canvas id="trendChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-title">벌점 사유별 분포</h3>
+      <div class="chart-canvas-wrap"><canvas id="reasonChart"></canvas></div>
+      <p id="reasonChartEmpty" class="empty-msg" style="display:none; padding: 24px 0;">집계할 벌점 내역이 없습니다.</p>
+    </div>
   </div>
 </div>
 
@@ -30,7 +48,7 @@
       {% for s in standards %}
       <div class="standard-item">
         <span class="std-desc">{{ s.description }}</span>
-        <span class="std-pts {% if s.penalty_points > 0 %}text-danger{% else %}text-success{% endif %}">
+        <span class="std-pts {% if s.penalty_points > 0 %}text-penalty{% else %}text-success{% endif %}">
           {% if s.penalty_points > 0 %}-{{ s.penalty_points }}점{% else %}+{{ s.merit_points }}점{% endif %}
         </span>
       </div>
@@ -44,9 +62,9 @@
 <!-- 정렬 -->
 <div class="table-toolbar">
   <span class="toolbar-label">정렬:</span>
-  <a href="?sort=date_desc" class="sort-btn {% if sort == 'date_desc' %}active{% endif %}">최신순</a>
-  <a href="?sort=date_asc" class="sort-btn {% if sort == 'date_asc' %}active{% endif %}">오래된순</a>
-  <a href="?sort=points_desc" class="sort-btn {% if sort == 'points_desc' %}active{% endif %}">점수 높은순</a>
+  <a href="?sort=date_desc" class="sort-btn {% if sort == 'date_desc' %}active{% endif %}" onclick="saveScrollPosition()">최신순</a>
+  <a href="?sort=date_asc" class="sort-btn {% if sort == 'date_asc' %}active{% endif %}" onclick="saveScrollPosition()">오래된순</a>
+  <a href="?sort=points_desc" class="sort-btn {% if sort == 'points_desc' %}active{% endif %}" onclick="saveScrollPosition()">점수 높은순</a>
 </div>
 
 <!-- 벌점 내역 테이블 -->
@@ -68,7 +86,7 @@
         <td>{{ p.date }}</td>
         <td>{{ p.reason }}</td>
         <td>
-          {% if p.points > 0 %}<span class="text-danger">-{{ p.points }}점</span>{% endif %}
+          {% if p.points > 0 %}<span class="text-penalty">-{{ p.points }}점</span>{% endif %}
           {% if p.merit_points > 0 %}<span class="text-success">+{{ p.merit_points }}점</span>{% endif %}
         </td>
         <td>
@@ -114,8 +132,67 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="{{ url_for('static', filename='js/signature.js') }}"></script>
 <script>
+// ── 통계 차트 ────────────────────────────────────
+(async function renderPenaltyCharts() {
+  const styles = getComputedStyle(document.documentElement);
+  const c = (name) => styles.getPropertyValue(name).trim();
+  Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+  Chart.defaults.color = c('--t3');
+
+  let data;
+  try {
+    const res = await fetch('/api/stats/penalties');
+    data = await res.json();
+  } catch (e) {
+    console.error('통계 로드 실패:', e);
+    return;
+  }
+
+  // 월별 추이 (벌점/상점)
+  new Chart(document.getElementById('trendChart'), {
+    type: 'bar',
+    data: {
+      labels: data.monthly.labels,
+      datasets: [
+        { label: '벌점', data: data.monthly.penalty, backgroundColor: c('--penalty'), borderRadius: 4, maxBarThickness: 28 },
+        { label: '상점', data: data.monthly.merit,   backgroundColor: c('--merit'),   borderRadius: 4, maxBarThickness: 28 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: c('--border') } },
+      },
+    },
+  });
+
+  // 사유별 벌점 분포 (도넛)
+  if (data.reasons.labels.length === 0) {
+    document.getElementById('reasonChart').style.display = 'none';
+    document.getElementById('reasonChartEmpty').style.display = 'block';
+  } else {
+    // 차트 전용 카테고리 팔레트 — 톤을 맞춘 차분한 듀스트 팔레트 (네이비·골드 아이덴티티와 조화)
+    const palette = ['#3f6485', '#c8a55a', '#bd7468', '#6f9c87', '#9482ab', '#b6a17d'];
+    new Chart(document.getElementById('reasonChart'), {
+      type: 'doughnut',
+      data: {
+        labels: data.reasons.labels,
+        datasets: [{ data: data.reasons.values, backgroundColor: palette, borderColor: c('--surface'), borderWidth: 2 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } },
+      },
+    });
+  }
+})();
+
 let currentPenaltyId = null;
 
 function openSignModal(penaltyId) {
@@ -133,12 +210,13 @@ function submitSignature() {
   const canvas = document.getElementById('signatureCanvas');
   const dataUrl = canvas.toDataURL('image/png');
   if (dataUrl.length < 5000) {
-    alert('서명을 그려주세요.');
+    showToast('서명을 그려주세요.', 'warning');
     return;
   }
   const form = document.getElementById('signForm');
   form.action = `/penalties/${currentPenaltyId}/confirm`;
   document.getElementById('signatureData').value = dataUrl;
+  saveScrollPosition();
   form.submit();
 }
 </script>

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
+from datetime import date
 from .models import User, Penalty, Document, Notification, PenaltyStandard
 from . import db
 
@@ -90,12 +91,58 @@ def search():
 
     docs = Document.query.filter(
         Document.student_id == current_user.id,
-        Document.title.ilike(f'%{q}%')
+        Document.doc_type.ilike(f'%{q}%')
     ).limit(5).all()
 
     return jsonify({
         'penalties': [{'id': p.id, 'reason': p.reason, 'date': p.date.isoformat()} for p in penalties],
-        'documents': [{'id': d.id, 'title': d.title, 'due_date': d.due_date.isoformat()} for d in docs],
+        'documents': [{'id': d.id, 'doc_type': d.doc_type, 'due_date': d.due_date.isoformat()} for d in docs],
+    })
+
+
+@api.route('/stats/penalties')
+@login_required
+def penalty_stats():
+    """본인 벌점/상점 통계: 최근 6개월 추이 + 사유별 벌점 분포"""
+    today = date.today()
+    months = []
+    y, m = today.year, today.month
+    for _ in range(6):
+        months.append((y, m))
+        m -= 1
+        if m == 0:
+            m = 12
+            y -= 1
+    months.reverse()
+
+    monthly = {f'{y}-{m:02d}': {'penalty': 0, 'merit': 0} for y, m in months}
+    reason_totals = {}
+
+    penalties = Penalty.query.filter_by(student_id=current_user.id, is_cancelled=False).all()
+    for p in penalties:
+        key = f'{p.date.year}-{p.date.month:02d}'
+        if key in monthly:
+            monthly[key]['penalty'] += p.points
+            monthly[key]['merit'] += p.merit_points
+        if p.points > 0:
+            reason_totals[p.reason] = reason_totals.get(p.reason, 0) + p.points
+
+    sorted_reasons = sorted(reason_totals.items(), key=lambda x: x[1], reverse=True)
+    top_reasons = sorted_reasons[:5]
+    other_total = sum(v for _, v in sorted_reasons[5:])
+    if other_total > 0:
+        top_reasons.append(('기타', other_total))
+
+    return jsonify({
+        'monthly': {
+            'labels': [f'{y}.{m:02d}' for y, m in months],
+            'penalty': [monthly[f'{y}-{m:02d}']['penalty'] for y, m in months],
+            'merit': [monthly[f'{y}-{m:02d}']['merit'] for y, m in months],
+        },
+        'reasons': {
+            'labels': [r for r, _ in top_reasons],
+            'values': [v for _, v in top_reasons],
+        },
     })
 
 

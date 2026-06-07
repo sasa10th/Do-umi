@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
   <title>{% block title %}Do우미{% endblock %} — SASA 기숙사 상벌점 시스템</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -71,6 +78,9 @@
         <div id="searchResults" class="search-dropdown"></div>
       </div>
       <div class="topbar-right">
+        <button type="button" class="theme-toggle-btn" id="themeToggle" aria-label="다크 모드 전환" title="다크 모드 전환">
+          <i class="bi bi-moon-stars"></i>
+        </button>
         <a href="{{ url_for('main.notifications') }}" class="notif-btn">
           <i class="bi bi-bell-fill"></i> <span id="topNotifCount"></span>
         </a>
@@ -78,17 +88,6 @@
     </header>
 
     <div class="content-area">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-              {{ message }}
-              <button onclick="this.parentElement.remove()" class="alert-close">×</button>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
       {% block content %}{% endblock %}
     </div>
   </div>
@@ -96,6 +95,33 @@
 {% else %}
   {% block auth_content %}{% endblock %}
 {% endif %}
+
+<!-- 토스트 알림 -->
+{% set toast_icons = {'success': 'bi-check-circle-fill', 'danger': 'bi-x-circle-fill', 'warning': 'bi-exclamation-triangle-fill', 'info': 'bi-info-circle-fill'} %}
+<div class="toast-container" id="toastContainer">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="toast toast-{{ category }}" role="alert">
+      <span class="toast-icon"><i class="bi {{ toast_icons.get(category, 'bi-info-circle-fill') }}"></i></span>
+      <span class="toast-msg">{{ message }}</span>
+      <button class="toast-close" aria-label="닫기">×</button>
+    </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<!-- 공통 확인 모달 -->
+<div class="modal" id="confirmModal" style="display:none">
+  <div class="modal-backdrop"></div>
+  <div class="modal-box modal-confirm">
+    <h3 class="modal-title" id="confirmModalTitle">확인</h3>
+    <p class="modal-desc" id="confirmModalMessage"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-sm" id="confirmModalCancel">취소</button>
+      <button type="button" class="btn btn-sm btn-primary" id="confirmModalOk">확인</button>
+    </div>
+  </div>
+</div>
 
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% block scripts %}{% endblock %}

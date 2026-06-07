@@ -8,7 +8,7 @@
   <h3>✎ 천자문 면제권 현황</h3>
   <div class="exemption-status">
     <div class="exemption-count">
-      <span class="count-num">{{ exemption_count }}</span>
+      <span class="count-num" data-count-up>{{ exemption_count }}</span>
       <span class="count-label">개 보유</span>
     </div>
     <p class="exemption-desc">면제권 1개를 사용하면 천자문 제출 1건을 면제받을 수 있습니다.</p>
@@ -52,7 +52,7 @@
       <div class="doc-actions">
         {% if exemption_count > 0 %}
         <form method="POST" action="{{ url_for('main.extend_document', doc_id=doc.id) }}"
-              onsubmit="return confirm('면제권 1개를 사용하여 이 천자문을 면제하시겠습니까?')">
+              data-confirm="면제권 1개를 사용하여 이 천자문을 면제하시겠습니까?">
           <button type="submit" class="btn btn-sm btn-outline">면제권 사용</button>
         </form>
         {% endif %}
@@ -60,7 +60,7 @@
         {% if not doc.is_extended %}
           {% if exam_period %}
           <form method="POST" action="{{ url_for('main.delay_document', doc_id=doc.id) }}"
-                onsubmit="return confirm('{{ exam_period.name }} 기간으로 2주 연기하시겠습니까?')">
+                data-confirm="{{ exam_period.name }} 기간으로 2주 연기하시겠습니까?">
             <button type="submit" class="btn btn-sm">기한 연기</button>
           </form>
           {% else %}

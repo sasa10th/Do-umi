@@ -125,7 +125,7 @@
     const verified = payload.email_verified;
 
     if (!verified || !email.endsWith("@" + ALLOWED_DOMAIN)) {
-      alert("sasa.hs.kr 계정만 허용됩니다.");
+      showToast("sasa.hs.kr 계정만 허용됩니다.", "danger");
       return;
     }
 

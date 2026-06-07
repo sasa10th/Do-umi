@@ -11,19 +11,38 @@
 
 <!-- KPI 섹션 -->
 {% set net_score = current_user.total_merit_points - current_user.total_penalty_points %}
+{% set merit_limit = 15 %}
+{% set expulsion_limit = 20 %}
+{% set progress_pct = ([-net_score, 0] | max / expulsion_limit * 100) | round(1) %}
+{% set progress_pct = [progress_pct, 100] | min %}
+{% set merit_limit_pct = (merit_limit / expulsion_limit * 100) | round(1) %}
 <div class="kpi-row">
   <!-- 누계 평점 — 메인 카드 -->
-  <div class="kpi-hero {% if net_score >= 10 %}kpi-danger{% elif net_score >= 5 %}kpi-warn{% endif %}">
+  <div class="kpi-hero {% if net_score <= -merit_limit %}kpi-danger{% elif net_score <= -(merit_limit - 5) %}kpi-warn{% endif %}">
     <span class="kpi-tag">누계 평점</span>
-    <div class="kpi-num">{{ net_score }}점</div>
-    <div class="kpi-sub">15점 이상 시 상점 제한</div>
+    <div class="kpi-num" data-count-up>{{ net_score }}점</div>
+    <div class="kpi-sub">누계 평점 -{{ merit_limit }}점 이후 상점 제한 및 -{{ expulsion_limit }}점 퇴사</div>
+
+    <div class="kpi-progress">
+      <div class="kpi-progress-track">
+        <div class="kpi-progress-fill" style="width: {{ progress_pct }}%"></div>
+        <div class="kpi-progress-mark" style="left: {{ merit_limit_pct }}%"></div>
+        <div class="kpi-progress-mark kpi-progress-mark-end"></div>
+      </div>
+      <div class="kpi-progress-labels">
+        <span class="kpi-progress-label" style="left: 0%">0점</span>
+        <span class="kpi-progress-label" style="left: {{ merit_limit_pct }}%">-{{ merit_limit }}점</span>
+        <span class="kpi-progress-label kpi-progress-label-end">-{{ expulsion_limit }}점</span>
+      </div>
+    </div>
+
     <div class="kpi-breakdown">
       <div class="kpi-breakdown-item">
-        <div class="kpi-breakdown-val penalty">{{ current_user.total_penalty_points }}점</div>
+        <div class="kpi-breakdown-val penalty" data-count-up>{{ current_user.total_penalty_points }}점</div>
         <div class="kpi-breakdown-label">벌점</div>
       </div>
       <div class="kpi-breakdown-item">
-        <div class="kpi-breakdown-val merit">{{ current_user.total_merit_points }}점</div>
+        <div class="kpi-breakdown-val merit" data-count-up>{{ current_user.total_merit_points }}점</div>
         <div class="kpi-breakdown-label">상점</div>
       </div>
     </div>
@@ -33,7 +52,7 @@
   <a href="{{ url_for('main.documents') }}" class="kpi-mini">
     <div class="kpi-mini-icon"><i class="bi bi-journal-text"></i></div>
     <div>
-      <div class="kpi-mini-num">{{ current_user.documents | selectattr('is_submitted', 'equalto', False) | list | length }}건</div>
+      <div class="kpi-mini-num" data-count-up>{{ current_user.documents | selectattr('is_submitted', 'equalto', False) | list | length }}건</div>
       <div class="kpi-mini-label">천자문 미제출</div>
       <div class="kpi-mini-sub">
         {% if upcoming_docs %}{{ upcoming_docs.due_date }} 마감{% else %}진행 중인 과제 없음{% endif %}
@@ -45,7 +64,7 @@
   <a href="{{ url_for('main.documents') }}" class="kpi-mini">
     <div class="kpi-mini-icon"><i class="bi bi-ticket-perforated"></i></div>
     <div>
-      <div class="kpi-mini-num">{{ current_user.exemption_count }}개</div>
+      <div class="kpi-mini-num" data-count-up>{{ current_user.exemption_count }}개</div>
       <div class="kpi-mini-label">천자문 면제권</div>
       <div class="kpi-mini-sub">프로필에서 등록</div>
     </div>
@@ -76,12 +95,12 @@
         <td>{{ p.date }}</td>
         <td>
           <span class="badge-category {% if p.points > 0 %}badge-penalty{% else %}badge-merit{% endif %}">
-            {{ p.category }}
+            {% if p.points > 0 %}벌점{% else %}상점{% endif %}
           </span>
         </td>
         <td>{{ p.reason }}</td>
         <td>
-          {% if p.points > 0 %}<span class="text-danger">-{{ p.points }}점</span>{% endif %}
+          {% if p.points > 0 %}<span class="text-penalty">-{{ p.points }}점</span>{% endif %}
           {% if p.merit_points > 0 %}<span class="text-success">+{{ p.merit_points }}점</span>{% endif %}
         </td>
         <td>

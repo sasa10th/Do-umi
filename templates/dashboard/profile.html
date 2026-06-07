@@ -91,7 +91,7 @@
   function saveProfileSignature() {
     const canvas = document.getElementById('profileSignCanvas');
     const dataUrl = canvas.toDataURL('image/png');
-    if (dataUrl.length < 5000) { alert('서명을 그려주세요.'); return; }
+    if (dataUrl.length < 5000) { showToast('서명을 그려주세요.', 'warning'); return; }
 
     localStorage.setItem('savedSignature', dataUrl); // ← 추가
 
