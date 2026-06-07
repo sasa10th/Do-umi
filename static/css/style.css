@@ -1,10 +1,6 @@
-/* ─────────────────────────────────────────────────────
-   Do우미 · SASA 기숙사 상벌점 시스템  —  Design v3
-   카드 없음 · 섹션 구분선 방식
-───────────────────────────────────────────────────── */
-
 /* 1 · RESET */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scrollbar-gutter: stable; background: var(--surface); }
 
 /* 2 · DESIGN TOKENS */
 :root {
@@ -531,7 +527,8 @@ a { text-decoration: none; color: inherit; }
   flex: 1; background: var(--surface-2);
   border-right: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  padding: 60px 48px; position: relative; overflow: hidden;
+  padding: 60px 48px; overflow: hidden;
+  position: sticky; top: 0; height: 100vh; align-self: flex-start;
 }
 .auth-left::before, .auth-left::after { display: none; }
 .auth-brand { position: relative; }
