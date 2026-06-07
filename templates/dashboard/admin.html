@@ -49,6 +49,39 @@
   display: flex;
   margin-top: auto;
 }
+
+/* 학생 검색 가능한 선택 컴포넌트 */
+.student-search-group {
+  position: relative;
+}
+.student-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--color-background-primary, #fff);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.student-search-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.student-search-item:hover,
+.student-search-item.active {
+  background: var(--color-background-secondary, #f2f2f2);
+}
+.student-search-empty {
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--color-text-tertiary, #888);
+}
 </style>
 <div class="page-header">
   <h1 class="page-title">관리자 대시보드</h1>
@@ -61,7 +94,10 @@
       학생 목록 ({{ total_students }}명)
     </summary>
 
-    <table class="data-table">
+    <div style="margin: 12px 0;">
+      <input type="text" id="student-list-search" placeholder="학번 또는 이름으로 검색..." style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 240px;" />
+    </div>
+    <table class="data-table" id="student-list-table">
       <thead>
         <tr>
           <th>이름</th>
@@ -73,7 +109,7 @@
       </thead>
       <tbody>
         {% for s in students %}
-        <tr>
+        <tr data-name="{{ s.name|lower }}" data-student-id="{{ (s.student_id or '')|lower }}">
           <td>{{ s.name }}</td>
           <td>{{ s.student_id or '-' }}</td>
           <td>{{ s.room_number or '-' }}</td>
@@ -95,14 +131,11 @@
   <div class="section-card">
     <h3>벌점 / 상점 등록</h3>
     <form method="POST" action="{{ url_for('main.admin_add_penalty') }}" class="admin-form">
-      <div class="form-group">
+      <div class="form-group student-search-group">
         <label>학생 선택</label>
-        <select name="student_id" required>
-          <option value="">-- 학생 선택 --</option>
-          {% for s in students %}
-          <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id or s.email }})</option>
-          {% endfor %}
-        </select>
+        <input type="text" class="student-search-input" placeholder="학번 또는 이름으로 검색" autocomplete="off" />
+        <input type="hidden" class="student-search-hidden" name="student_id" />
+        <div class="student-search-results"></div>
       </div>
       <div class="form-group">
         <label>일자</label>
@@ -130,14 +163,11 @@
   <div class="section-card">
     <h3>천자문 면제권 지급</h3>
     <form method="POST" action="{{ url_for('main.admin_grant_exemption') }}" class="admin-form">
-      <div class="form-group">
+      <div class="form-group student-search-group">
         <label>학생 선택</label>
-        <select name="student_id" required>
-          <option value="">-- 학생 선택 --</option>
-          {% for s in students %}
-          <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id or s.email }})</option>
-          {% endfor %}
-        </select>
+        <input type="text" class="student-search-input" placeholder="학번 또는 이름으로 검색" autocomplete="off" />
+        <input type="hidden" class="student-search-hidden" name="student_id" />
+        <div class="student-search-results"></div>
       </div>
       <div class="form-group">
         <label>지급 개수</label>
@@ -155,14 +185,11 @@
   <div class="section-card">
     <h3>천자문 과제 등록</h3>
     <form method="POST" action="{{ url_for('main.admin_assign_document') }}" class="admin-form">
-      <div class="form-group">
+      <div class="form-group student-search-group">
         <label>학생 선택</label>
-        <select name="student_id" required>
-          <option value="">-- 학생 선택 --</option>
-          {% for s in students %}
-          <option value="{{ s.id }}">{{ s.name }} ({{ s.student_id or s.email }})</option>
-          {% endfor %}
-        </select>
+        <input type="text" class="student-search-input" placeholder="학번 또는 이름으로 검색" autocomplete="off" />
+        <input type="hidden" class="student-search-hidden" name="student_id" />
+        <div class="student-search-results"></div>
       </div>
       <div class="form-group">
         <select name="doc_type">
@@ -308,9 +335,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const forms = document.querySelectorAll('.admin-form');
-  
+
   forms.forEach(form => {
     form.addEventListener('submit', function(e) {
+      const studentHidden = form.querySelector('.student-search-hidden');
+      if (studentHidden && !studentHidden.value) {
+        e.preventDefault();
+        alert('목록에서 학생을 선택해주세요.');
+        const studentInput = form.querySelector('.student-search-input');
+        if (studentInput) studentInput.focus();
+        return;
+      }
       const submitButton = form.querySelector('button[type="submit"]');
       if (submitButton) {
         submitButton.disabled = true;
@@ -318,6 +353,91 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // ── 학생 선택 검색 콤보박스 ────────────────────────────────
+  const ALL_STUDENTS = [
+    {% for s in students %}
+    { id: {{ s.id }}, student_id: {{ (s.student_id or '')|tojson }}, name: {{ s.name|tojson }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  function setupStudentSearch(group) {
+    const input = group.querySelector('.student-search-input');
+    const hidden = group.querySelector('.student-search-hidden');
+    const results = group.querySelector('.student-search-results');
+
+    function label(s) {
+      return s.name + ' (' + (s.student_id || '학번 없음') + ')';
+    }
+
+    function showResults(matches) {
+      results.innerHTML = '';
+      if (matches.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'student-search-empty';
+        empty.textContent = '검색 결과가 없습니다.';
+        results.appendChild(empty);
+      } else {
+        matches.slice(0, 30).forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'student-search-item';
+          item.textContent = label(s);
+          item.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            hidden.value = s.id;
+            input.value = label(s);
+            results.style.display = 'none';
+          });
+          results.appendChild(item);
+        });
+      }
+      results.style.display = 'block';
+    }
+
+    input.addEventListener('input', function() {
+      hidden.value = '';
+      const q = input.value.trim().toLowerCase();
+      if (!q) {
+        results.style.display = 'none';
+        return;
+      }
+      const matches = ALL_STUDENTS.filter(s =>
+        (s.student_id && s.student_id.toLowerCase().includes(q)) ||
+        (s.name && s.name.toLowerCase().includes(q))
+      );
+      showResults(matches);
+    });
+
+    input.addEventListener('focus', function() {
+      if (input.value.trim() && !hidden.value) {
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!group.contains(e.target)) {
+        results.style.display = 'none';
+      }
+    });
+  }
+
+  document.querySelectorAll('.student-search-group').forEach(setupStudentSearch);
+
+  // ── 학생 목록 검색 ────────────────────────────────────────
+  const studentListSearch = document.getElementById('student-list-search');
+  const studentListTable = document.getElementById('student-list-table');
+
+  if (studentListSearch && studentListTable) {
+    studentListSearch.addEventListener('input', function(e) {
+      const q = e.target.value.trim().toLowerCase();
+      const rows = studentListTable.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const sid = row.getAttribute('data-student-id') || '';
+        row.style.display = (!q || name.includes(q) || sid.includes(q)) ? '' : 'none';
+      });
+    });
+  }
 
   function debounce(fn, wait) {
     let t;
