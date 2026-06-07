@@ -1,6 +1,6 @@
 /* 1 · RESET */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scrollbar-gutter: stable; background: var(--bg); min-height: 100%; }
+html { scrollbar-gutter: stable; background: var(--surface); min-height: 100%; }
 
 /* 2 · DESIGN TOKENS */
 :root {
