@@ -193,6 +193,7 @@ function applyTheme(theme) {
   else document.documentElement.removeAttribute('data-theme');
   const icon = document.querySelector('#themeToggle i');
   if (icon) icon.className = theme === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
 }
 
 function initThemeToggle() {

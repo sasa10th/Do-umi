@@ -137,11 +137,6 @@
 <script>
 // ── 통계 차트 ────────────────────────────────────
 (async function renderPenaltyCharts() {
-  const styles = getComputedStyle(document.documentElement);
-  const c = (name) => styles.getPropertyValue(name).trim();
-  Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
-  Chart.defaults.color = c('--t3');
-
   let data;
   try {
     const res = await fetch('/api/stats/penalties');
@@ -151,46 +146,62 @@
     return;
   }
 
-  // 월별 추이 (벌점/상점)
-  new Chart(document.getElementById('trendChart'), {
-    type: 'bar',
-    data: {
-      labels: data.monthly.labels,
-      datasets: [
-        { label: '벌점', data: data.monthly.penalty, backgroundColor: c('--penalty'), borderRadius: 4, maxBarThickness: 28 },
-        { label: '상점', data: data.monthly.merit,   backgroundColor: c('--merit'),   borderRadius: 4, maxBarThickness: 28 },
-      ],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: c('--border') } },
-      },
-    },
-  });
+  let trendChart, reasonChart;
 
-  // 사유별 벌점 분포 (도넛)
-  if (data.reasons.labels.length === 0) {
-    document.getElementById('reasonChart').style.display = 'none';
-    document.getElementById('reasonChartEmpty').style.display = 'block';
-  } else {
-    // 차트 전용 카테고리 팔레트 — 톤을 맞춘 차분한 듀스트 팔레트 (네이비·골드 아이덴티티와 조화)
-    const palette = ['#3f6485', '#c8a55a', '#bd7468', '#6f9c87', '#9482ab', '#b6a17d'];
-    new Chart(document.getElementById('reasonChart'), {
-      type: 'doughnut',
+  function buildCharts() {
+    const styles = getComputedStyle(document.documentElement);
+    const c = (name) => styles.getPropertyValue(name).trim();
+    Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+    Chart.defaults.color = c('--t3');
+
+    if (trendChart) trendChart.destroy();
+    if (reasonChart) reasonChart.destroy();
+
+    // 월별 추이 (벌점/상점)
+    trendChart = new Chart(document.getElementById('trendChart'), {
+      type: 'bar',
       data: {
-        labels: data.reasons.labels,
-        datasets: [{ data: data.reasons.values, backgroundColor: palette, borderColor: c('--surface'), borderWidth: 2 }],
+        labels: data.monthly.labels,
+        datasets: [
+          { label: '벌점', data: data.monthly.penalty, backgroundColor: c('--penalty'), borderRadius: 4, maxBarThickness: 28 },
+          { label: '상점', data: data.monthly.merit,   backgroundColor: c('--merit'),   borderRadius: 4, maxBarThickness: 28 },
+        ],
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        cutout: '62%',
         plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: c('--border') } },
+        },
       },
     });
+
+    // 사유별 벌점 분포 (도넛)
+    if (data.reasons.labels.length === 0) {
+      document.getElementById('reasonChart').style.display = 'none';
+      document.getElementById('reasonChartEmpty').style.display = 'block';
+    } else {
+      // 차트 전용 카테고리 팔레트 — 톤을 맞춘 차분한 듀스트 팔레트 (네이비·골드 아이덴티티와 조화)
+      const palette = ['#3f6485', '#c8a55a', '#bd7468', '#6f9c87', '#9482ab', '#b6a17d'];
+      reasonChart = new Chart(document.getElementById('reasonChart'), {
+        type: 'doughnut',
+        data: {
+          labels: data.reasons.labels,
+          datasets: [{ data: data.reasons.values, backgroundColor: palette, borderColor: c('--surface'), borderWidth: 2 }],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11.5 } } } },
+        },
+      });
+    }
   }
+
+  buildCharts();
+  // 라이트/다크 모드 전환 시 CSS 변수 색상이 바뀌므로 차트를 다시 그림
+  document.addEventListener('themechange', buildCharts);
 })();
 
 let currentPenaltyId = null;
