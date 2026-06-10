@@ -36,5 +36,16 @@ def create_app(config_name='default'):
     
     with app.app_context():
         db.create_all()
+        
+        from .models import User
+        if not User.query.filter_by(email='admin@sasa.hs.kr').first():
+            admin = User(
+                email='admin@sasa.hs.kr',
+                name='관리자',
+                is_admin=True
+            )
+            admin.password = 'admin1234'
+            db.session.add(admin)
+            db.session.commit()
 
     return app
